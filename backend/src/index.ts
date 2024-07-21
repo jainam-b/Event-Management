@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { sign, verify } from "hono/jwt";
 // import bcrypt from "bcryptjs";
 import { userRouter } from "./routes/user";
+import { eventRouter } from "./routes/event";
  
 import { cors } from "hono/cors";
 const app = new Hono<{
@@ -15,6 +16,6 @@ const app = new Hono<{
  
 app.use("/*", cors());
 app.route("/api/v1/user", userRouter);
-// app.route("/api/v1/blog", blogRouter);
+app.route("/api/v1/event", eventRouter);
 
 export default app;
