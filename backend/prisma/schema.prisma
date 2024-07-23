@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
+  id           String         @id @default(uuid())
   name         String
   email        String        @unique
   password     String
@@ -25,7 +25,7 @@ model User {
 }
 
 model Event {
-  id           Int           @id @default(autoincrement())
+  id           String         @id @default(uuid())
   name         String
   description  String?
   location     String
@@ -39,8 +39,8 @@ model Event {
 }
 
 model TicketType {
-  id                Int      @id @default(autoincrement())
-  eventId           Int
+  id           String         @id @default(uuid())
+  eventId           String
   name              String
   price             Int
   totalQuantity     Int
@@ -58,10 +58,10 @@ enum TicketStatus {
 }
 
 model Ticket {
-  id            Int          @id @default(autoincrement())
-  userId        Int
-  eventId       Int
-  ticketTypesId Int
+   id           String         @id @default(uuid())
+  userId        String
+  eventId       String
+  ticketTypesId String
   purchasedDate DateTime
   status        TicketStatus @default(ACTIVE)
   user          User         @relation(fields: [userId], references: [id])
@@ -71,8 +71,8 @@ model Ticket {
 
 model Transaction {
   id              Int      @id @default(autoincrement())
-  userId          Int?
-  eventId         Int
+   userId        String?
+  eventId       String
   totalAmount     Float
   paymentMethod   String
   paymentStatus   String   @default("completed")
@@ -85,7 +85,7 @@ model Transaction {
 
 model SeatMap {
   id         Int      @id @default(autoincrement())
-  eventId    Int
+  eventId    String
   seatNumber String
   isReserved Boolean  @default(false)
   createdAt  DateTime @default(now())

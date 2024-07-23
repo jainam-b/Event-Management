@@ -64,16 +64,12 @@ eventRouter.post("/create", async (c) => {
 
   const { name, description, date, location, ticketTypes } = body;
 
-  // Convert the date to a format that the JavaScript Date object can understand
-  const [day, month, year] = date.split("/");
-  const formattedDate = `${year}-${month}-${day}`;
-  const eventDate = new Date(formattedDate);
-
-  // Validate the date
-  if (isNaN(eventDate.getTime())) {
+  // Convert and validate the date
+  const { valid, date: eventDate, message } = convertAndValidateDate(date);
+  if (!valid) {
     c.status(400);
     return c.json({
-      msg: "Invalid date format",
+      msg: message,
     });
   }
 
@@ -82,7 +78,7 @@ eventRouter.post("/create", async (c) => {
       data: {
         name,
         description,
-        date: eventDate,
+        date: eventDate!,
         location,
         ticketTypes: {
           create: ticketTypes.map((ticketType: TicketType) => ({
@@ -125,66 +121,144 @@ eventRouter.get("/events/:id", async (c) => {
   const eventId = c.req.param("id");
   const eventbyId = await prisma.event.findFirst({
     where: {
-      id: parseInt(eventId),
+      id: eventId,
     },
   });
   return c.json(eventbyId);
 });
 
 eventRouter.put("/events/:id", async (c) => {
-  const body = c.req.json();
-  const { success } = createEventSchema.safeParse(body);
-  const eventId= c.req.param("id")
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
+  const body = await c.req.json();
+  const { success, error } = createEventSchema.safeParse(body);
+  const eventId = c.req.param("id");
+
   if (!success) {
     c.status(411);
     return c.json({
-      msg: "Error Invalid inputs ",
+      msg: "Error Invalid inputs",
+      error: error.errors,
     });
   }
-  const { name, description, date, location, ticketTypes } = body;
-  // Convert the date to a format that the JavaScript Date object can understand
-  const [day, month, year] = date.split("/");
-  const formattedDate = `${year}-${month}-${day}`;
-  const eventDate = new Date(formattedDate);
 
-  // Validate the date
-  if (isNaN(eventDate.getTime())) {
+  const { name, description, date, location, ticketTypes } = body;
+
+  // Convert and validate the date
+  const { valid, date: eventDate, message } = convertAndValidateDate(date);
+  if (!valid) {
     c.status(400);
     return c.json({
-      msg: "Invalid date format",
+      msg: message,
     });
   }
+
   try {
-    
-    const updateEvent= await prisma.event.update({
-      where:{
-        id: parseInt(eventId),
+    // Update the event
+    const updateEvent = await prisma.event.update({
+      where: {
+        id: eventId,
       },
       data: {
         name,
         description,
         date: eventDate,
         location,
-        ticketTypes: {
-          create: ticketTypes.map((ticketType: TicketType) => ({
-            name: ticketType.name,
-            price: ticketType.price,
-            totalQuantity: ticketType.totalQuantity,
-            availableQuantity: ticketType.availableQuantity,
-          })),
-        },
       },
-    })
-    
-  } catch (error) {
+    });
+
+    // Handle ticket types update
+    if (ticketTypes && ticketTypes.length > 0) {
+      for (const ticketType of ticketTypes) {
+        const existingTicketType = await prisma.ticketType.findFirst({
+          where: {
+            eventId: eventId,
+            name: ticketType.name,
+          },
+        });
+
+        if (existingTicketType) {
+          await prisma.ticketType.update({
+            where: {
+              id: existingTicketType.id,
+            },
+            data: {
+              price: ticketType.price,
+              totalQuantity: ticketType.totalQuantity,
+              availableQuantity: ticketType.availableQuantity,
+            },
+          });
+        } else {
+          console.warn(
+            `TicketType with name ${ticketType.name} for event ID ${eventId} not found, skipping update.`
+          );
+        }
+      }
+    }
+
+    c.status(200);
+    return c.json({
+      msg: "Event updated successfully",
+      event: updateEvent,
+    });
+  } catch (error: any) {
+    console.error(error);
     c.status(500); // Internal Server Error
     return c.json({
-      msg: "An error occurred while creating the event",
+      msg: "An error occurred while updating the event",
+      error: error.message,
     });
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
+eventRouter.delete("/events/:id",async(c)=>{
+  const eventId=   c.req.param("id");
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+ try {
+  const deleteEvent= await prisma.event.delete({
+    where:{
+      id:eventId
+    }
+  })
+  return c.json({
+    msg:`Event delete successfully with ID: ${eventId}`
+  })
+ } catch (error) {
+  c.status(500);
+  return c.json({
+    msg:"Error occured while deleting the event !!"
+  })
+ }
+
+
+})
+
+
+// function to convert data into correct format 
+export function convertAndValidateDate(dateString: string): {
+  valid: boolean;
+  date?: Date;
+  message?: string;
+} {
+  const [day, month, year] = dateString.split("/");
+  const formattedDate = `${year}-${month}-${day}`;
+  const date = new Date(formattedDate);
+
+  if (isNaN(date.getTime())) {
+    return {
+      valid: false,
+      message: "Invalid date format",
+    };
   }
 
-
-});
+  return {
+    valid: true,
+    date,
+  };
+}
