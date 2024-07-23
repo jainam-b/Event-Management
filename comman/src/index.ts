@@ -46,3 +46,21 @@ export const createEventSchema = z.object({
 
  
 export type CreateEventSchemaType = z.infer<typeof createEventSchema>;
+
+export const ticketType = z.object({
+  name: z.string().min(1, "Ticket type name is required"),
+  price: z.number().nonnegative().min(0, "Price must be a non-negative number"),
+  totalQuantity: z
+    .number()
+    .int()
+    .nonnegative()
+    .min(0, "Total quantity must be a non-negative integer"),
+  availableQuantity: z
+    .number()
+    .int()
+    .nonnegative()
+    .min(0, "Available quantity must be a non-negative integer"),
+});
+
+export type TicketType =z.infer<typeof ticketType>
+ 
