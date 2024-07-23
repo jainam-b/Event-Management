@@ -44,7 +44,6 @@ export const createEventSchema = z.object({
     .min(1, "At least one ticket type is required"),
 });
 
- 
 export type CreateEventSchemaType = z.infer<typeof createEventSchema>;
 
 export const ticketType = z.object({
@@ -62,5 +61,14 @@ export const ticketType = z.object({
     .min(0, "Available quantity must be a non-negative integer"),
 });
 
-export type TicketType =z.infer<typeof ticketType>
- 
+export type TicketType = z.infer<typeof ticketType>;
+
+export const ticket = z.object({
+  userId: z.string().uuid("Invalid user ID format"),
+  eventId: z.string().uuid("Invalid event ID format"),
+  ticketTypesId: z.string().uuid("Invalid ticket type ID format"),
+  quantity: z.number().int().positive("Quantity must be a positive integer"),
+  status: z.enum(["ACTIVE", "USED", "CANCELED"]).optional(),
+
+});
+export type Ticket =z.infer<typeof ticket>
