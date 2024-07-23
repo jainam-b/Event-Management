@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
+  id           String        @id @default(uuid())
   name         String
   email        String        @unique
   password     String
@@ -25,7 +25,7 @@ model User {
 }
 
 model Event {
-  id           String         @id @default(uuid())
+  id           String        @id @default(uuid())
   name         String
   description  String?
   location     String
@@ -39,7 +39,7 @@ model Event {
 }
 
 model TicketType {
-  id           String         @id @default(uuid())
+  id                String   @id @default(uuid())
   eventId           String
   name              String
   price             Int
@@ -58,11 +58,12 @@ enum TicketStatus {
 }
 
 model Ticket {
-   id           String         @id @default(uuid())
+  id            String       @id @default(uuid())
   userId        String
   eventId       String
   ticketTypesId String
-  purchasedDate DateTime
+  quantity      Int          @default(1)
+  purchasedDate DateTime     @default(now())
   status        TicketStatus @default(ACTIVE)
   user          User         @relation(fields: [userId], references: [id])
   event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -71,8 +72,8 @@ model Ticket {
 
 model Transaction {
   id              Int      @id @default(autoincrement())
-   userId        String?
-  eventId       String
+  userId          String?
+  eventId         String
   totalAmount     Float
   paymentMethod   String
   paymentStatus   String   @default("completed")

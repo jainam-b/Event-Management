@@ -5,7 +5,7 @@
     "deploy": "wrangler deploy --minify src/index.ts"
   },
   "dependencies": {
-    "@jainam-b/event-comman": "^4.0.0",
+    "@jainam-b/event-comman": "^7.0.0",
     "@prisma/client": "^5.17.0",
     "@prisma/extension-accelerate": "^1.1.0",
     "@types/bcrypt": "^5.0.2",
