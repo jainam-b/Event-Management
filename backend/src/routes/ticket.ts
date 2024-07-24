@@ -13,24 +13,11 @@ export const ticketRouter = new Hono<{
 
 // ticketRouter.use("/*", authMiddleware);
 
-ticketRouter.get("/", authMiddleware, async (c) => {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env.DATABASE_URL,
-  }).$extends(withAccelerate());
 
-  if (!c.user?.role) {
-    c.status(403);
-    return c.json({
-      error: "Forbidden",
-    });
-  }
-
-  const tickets = await prisma.ticket.findMany();
-  return c.json(tickets);
-});
 
 // route to purchase a ticket
-ticketRouter.post("/create", async (c) => {
+ 
+ticketRouter.post("/create", authMiddleware, async (c) => {
   const body = await c.req.json();
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -44,65 +31,88 @@ ticketRouter.post("/create", async (c) => {
       errors: validation.error.errors,
     });
   }
-
-  const { userId, eventId, ticketTypesId, quantity } = body;
+  const userId = c.user?.id;
+  const { eventId, ticketTypesId, quantity } = body;
 
   try {
-    // Start a transaction to ensure atomic operations
-    const result = await prisma.$transaction(async (prisma) => {
-      // Find existing tickets for this user, event, and ticket type
-      const existingTicket = await prisma.ticket.findFirst({
-        where: {
-          userId,
-          eventId,
-          ticketTypesId,
-          status: "ACTIVE",
-        },
-      });
-
-      if (existingTicket) {
-        // Update the existing ticket quantity
-        await prisma.ticket.update({
-          where: {
-            id: existingTicket.id,
-          },
-          data: {
-            quantity: existingTicket.quantity + quantity, // Increment the quantity
-            purchasedDate: new Date(), // Update the purchased date
-          },
-        });
-      } else {
-        // Create new tickets if none exist
-        await prisma.ticket.create({
-          data: {
-            userId,
-            eventId,
-            ticketTypesId,
-            quantity, // Set the quantity
-            status: "ACTIVE",
-            purchasedDate: new Date(), // Set purchased date
-          },
-        });
-      }
-
-      // Update the available quantity in the TicketType table
-      const ticketType = await prisma.ticketType.findUnique({
-        where: { id: ticketTypesId },
-      });
-
-      if (ticketType) {
-        await prisma.ticketType.update({
-          where: { id: ticketTypesId },
-          data: {
-            availableQuantity: ticketType.availableQuantity - quantity,
-          },
-        });
-      }
-
-      return { msg: "Tickets processed successfully!" };
+    // Find the ticket type first to ensure it's available
+    const ticketType = await prisma.ticketType.findUnique({
+      where: { id: ticketTypesId },
     });
 
-    return c.json(result);
+    if (!ticketType) {
+      c.status(400);
+      return c.json({ msg: "Ticket type not found" });
+    }
+
+    if (ticketType.availableQuantity < quantity) {
+      c.status(400);
+      return c.json({ msg: "Not enough tickets available" });
+    }
+
+    let ticketId: string;
+
+    // Find existing tickets for this user, event, and ticket type
+    const existingTicket = await prisma.ticket.findFirst({
+      where: {
+        userId,
+        eventId,
+        ticketTypesId,
+        status: "ACTIVE",
+      },
+    });
+
+    if (existingTicket) {
+      // Update the existing ticket quantity
+      const updatedTicket = await prisma.ticket.update({
+        where: {
+          id: existingTicket.id,
+        },
+        data: {
+          quantity: existingTicket.quantity + quantity, // Increment the quantity
+          purchasedDate: new Date(), // Update the purchased date
+        },
+      });
+      ticketId = updatedTicket.id;
+    } else {
+      // Create new tickets if none exist
+      const newTicket = await prisma.ticket.create({
+        data: {
+          userId:userId,
+          eventId,
+          ticketTypesId,
+          quantity, // Set the quantity
+          status: "ACTIVE",
+          purchasedDate: new Date(), // Set purchased date
+          
+           
+        },
+      });
+      ticketId = newTicket.id;
+    }
+
+    // Update the available quantity in the TicketType table
+    await prisma.ticketType.update({
+      where: { id: ticketTypesId },
+      data: {
+        availableQuantity: ticketType.availableQuantity - quantity,
+      },
+    });
+
+    // Create a transaction record
+    await prisma.transaction.create({
+      data: {
+        userId:userId,
+        eventId,
+        ticketTypesId, // Include the ticketTypesId
+        totalAmount: ticketType.price * quantity,  
+        paymentMethod: "credit card",  
+        paymentStatus: "completed",
+        
+      },
+    });
+
+    return c.json({ msg: "Tickets processed successfully!" });
   } catch (error) {
     console.error("Error during ticket purchase:", error);
     c.status(500);
@@ -111,6 +121,8 @@ ticketRouter.post("/create", async (c) => {
     });
   }
 });
+
+
 
 // Get details of a specific ticket
 ticketRouter.get("/:ticketId", async (c) => {
@@ -174,7 +186,6 @@ ticketRouter.put("/:ticketId", async (c) => {
   }
 });
 
-
 ticketRouter.delete("/:ticketId", authMiddleware, async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -188,8 +199,8 @@ ticketRouter.delete("/:ticketId", authMiddleware, async (c) => {
       },
     });
     return c.json({
-      msg:"Deleted",
-      tickets
+      msg: "Deleted",
+      tickets,
     });
   } catch (error: any) {
     c.status(500);
@@ -197,4 +208,19 @@ ticketRouter.delete("/:ticketId", authMiddleware, async (c) => {
       error: error.message,
     });
   }
+});
+ticketRouter.get("/", authMiddleware, async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  if (!c.user?.role) {
+    c.status(403);
+    return c.json({
+      error: "Forbidden",
+    });
+  }
+
+  const tickets = await prisma.ticket.findMany();
+  return c.json(tickets);
 });

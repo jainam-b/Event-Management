@@ -64,7 +64,7 @@ export const ticketType = z.object({
 export type TicketType = z.infer<typeof ticketType>;
 
 export const ticket = z.object({
-  userId: z.string().uuid("Invalid user ID format"),
+  userId: z.string().uuid("Invalid user ID format").optional(),
   eventId: z.string().uuid("Invalid event ID format"),
   ticketTypesId: z.string().uuid("Invalid ticket type ID format"),
   quantity: z.number().int().positive("Quantity must be a positive integer"),
