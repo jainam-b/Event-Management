@@ -7,6 +7,7 @@ import { userRouter } from "./routes/user";
 import { eventRouter } from "./routes/event";
 import { ticketTypeRouter } from "./routes/ticketType";
 import { ticketRouter } from "./routes/ticket";
+import { transactionRouter } from "./routes/transaction";
  
 import { cors } from "hono/cors";
 const app = new Hono<{
@@ -21,5 +22,6 @@ app.route("/api/v1/user", userRouter);
 app.route("/api/v1/", eventRouter);
 app.route("/api/v1/", ticketTypeRouter);
 app.route("/api/v1/ticket", ticketRouter);
+app.route("/api/v1/transaction", transactionRouter);
 
 export default app;
