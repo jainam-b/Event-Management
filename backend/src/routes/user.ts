@@ -33,11 +33,14 @@ userRouter.post("/signup", async (c) => {
         name: body.name,
         email: body.email,
         password: hashedPassword,
+        role:body.role || "user"
       },
     });
     const token = await sign(
       {
         id: user.id,
+        email: user.email,
+        role: user.role,
       },
       c.env.JWT_SECRET
     );
@@ -92,14 +95,16 @@ userRouter.post("/signin", async (c) => {
     const token = await sign(
       {
         id: user.id,
+        email: user.email,
+        role: user.role,
       },
       c.env.JWT_SECRET
     );
 
     setCookie(c, "token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      // httpOnly: true,
+      // secure: true,
+      // sameSite: "strict",
     });
     return c.json({ message: "Logged in successfully" });
   } catch (e) {

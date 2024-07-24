@@ -11,9 +11,11 @@
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
+    "@types/jsonwebtoken": "^9.0.6",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "hono": "^4.5.0",
+    "jsonwebtoken": "^9.0.2",
     "prisma": "^5.17.0"
   },
   "devDependencies": {
