@@ -3,10 +3,12 @@ import Sideimage from "../components/Sideimage";
 
 const Signin = () => {
   return (
-    <div className="grid  grid-cols-1 lg:grid-cols-2">
-      <Sideimage/>
-      <div className="hidden lg:block grid-cols-2">
-       <Auth/>
+    <div className="grid grid-cols-1 lg:grid-cols-4 h-screen">
+      <div className="col-span-2">
+      <Sideimage />
+      </div>
+      <div className="col-span-2 hidden lg:block">
+        <Auth />
       </div>
     </div>
   );

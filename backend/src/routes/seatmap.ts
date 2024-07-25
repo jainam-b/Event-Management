@@ -82,8 +82,6 @@ seatMapRouter.post("/events/:eventId/seat-map", authMiddleware, async (c) => {
 
 
 
- 
-
 const assignSeatSchema = z.object({
   userId: z.string().uuid("Invalid user ID format").optional(),
   ticketTypesId: z.string().uuid("Invalid ticket type ID format"),
@@ -91,10 +89,10 @@ const assignSeatSchema = z.object({
 });
 
 seatMapRouter.post("/events/:eventId/tickets/assign", authMiddleware, async (c) => {
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-      }).$extends(withAccelerate());
-    const eventId = c.req.param("eventId");
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+  const eventId = c.req.param("eventId");
   const body = await c.req.json();
   const validation = assignSeatSchema.safeParse(body);
 
@@ -150,7 +148,7 @@ seatMapRouter.post("/events/:eventId/tickets/assign", authMiddleware, async (c) 
       userId,
       eventId,
       ticketTypesId,
-      seatId: seat.id, 
+      seatId: seat.id,
       status: "ACTIVE",
       purchasedDate: new Date(),
     }));
@@ -160,12 +158,16 @@ seatMapRouter.post("/events/:eventId/tickets/assign", authMiddleware, async (c) 
       data: ticketCreation,
     });
 
-    return c.json({ msg: "Seats assigned successfully!" });
+    // Collect seat numbers for response
+    const seatNumbers = availableSeats.map(seat => seat.seatNumber);
+
+    return c.json({ msg: "Seats assigned successfully!", seatNumbers });
   } catch (error) {
     console.error("Error assigning seats:", error);
     c.status(500);
     return c.json({ msg: "An error occurred while assigning the seats" });
   }
 });
+
 
   

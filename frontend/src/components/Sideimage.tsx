@@ -1,11 +1,12 @@
-import React from 'react'
+import React from 'react';
 import sideimg from "../assets/signupimage.png";
+
 const Sideimage = () => {
   return (
-    <div>
-       <img className="  h-screen w-4/6" src={sideimg} alt="" />
+    <div className="relative h-screen flex justify-start">
+      <img className="h-full w-4/6 object-cover" src={sideimg} alt="Side Image" />
     </div>
-  )
-}
+  );
+};
 
-export default Sideimage
+export default Sideimage;
