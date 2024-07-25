@@ -23,6 +23,7 @@ model User {
   updatedAt    DateTime      @updatedAt
   tickets      Ticket[]
   transactions Transaction[]
+  SeatMap      SeatMap[]
 }
 
 enum userRole {
@@ -70,19 +71,21 @@ model Ticket {
   userId        String
   eventId       String
   ticketTypesId String
+  seatId        String
   quantity      Int          @default(1)
   purchasedDate DateTime     @default(now())
   status        TicketStatus @default(ACTIVE)
   user          User         @relation(fields: [userId], references: [id])
   event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   ticketType    TicketType   @relation(fields: [ticketTypesId], references: [id])
+  seat          SeatMap      @relation(fields: [seatId], references: [id])
 }
 
 model Transaction {
   id              String     @id @default(uuid())
   userId          String?
   eventId         String
-  ticketTypesId   String      
+  ticketTypesId   String
   totalAmount     Float
   paymentMethod   String
   paymentStatus   String     @default("completed")
@@ -96,10 +99,15 @@ model Transaction {
 
 model SeatMap {
   id         String   @id @default(uuid())
+  userId     String?
   eventId    String
   seatNumber String
+  row        Int
+  column     Int
   isReserved Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id])
+  ticket     Ticket[]
 }
