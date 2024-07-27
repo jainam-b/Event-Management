@@ -1,17 +1,31 @@
-import React, { useState } from "react";
-import { SignupInput } from "@jainam-b/event-comman/dist";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { BACKEND_URL } from "../config";
+import React, { useState } from 'react';
+import { SignupInput } from '@jainam-b/event-comman/dist';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { BACKEND_URL } from '../config';
 import Cookies from 'js-cookie';
 
-const Auth = () => {
+interface Errors {
+  name: string;
+  email: string;
+  password: string;
+  general: string;
+}
+
+const Auth: React.FC = () => {
   const [signupInputs, setSignupInputs] = useState<SignupInput>({
-    name: "",
-    email: "",
-    password: "",
+    name: '',
+    email: '',
+    password: '',
   });
-  
+
+  const [errors, setErrors] = useState<Errors>({
+    name: '',
+    email: '',
+    password: '',
+    general: '',
+  });
+
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,17 +34,53 @@ const Auth = () => {
       ...prevState,
       [id]: value,
     }));
+    setErrors((prevErrors) => ({ ...prevErrors, [id]: '' }));
+  };
+
+  const validateInputs = (): boolean => {
+    let isValid = true;
+    const newErrors: Errors = { name: '', email: '', password: '', general: '' };
+
+    if (!signupInputs.name?.trim()) {
+      newErrors.name = 'Name is required';
+      isValid = false;
+    }
+
+    if (!signupInputs.email.trim()) {
+      newErrors.email = 'Email is required';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(signupInputs.email)) {
+      newErrors.email = 'Email is invalid';
+      isValid = false;
+    }
+
+    if (!signupInputs.password) {
+      newErrors.password = 'Password is required';
+      isValid = false;
+    } else if (signupInputs.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const sendRequest = async () => {
+    if (!validateInputs()) {
+      return;
+    }
+
     try {
-      const response=await axios.post(`${BACKEND_URL}/api/v1/user/signup`, signupInputs );
-      console.log(response.data);
-      console.log(Cookies.get('token'));
-      // Navigate to another page after successful signup
-      navigate('/signin');
+      const response = await axios.post(`${BACKEND_URL}/api/v1/user/signup`, signupInputs);
+      Cookies.set('token', response.data.token);
+      navigate('/');
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        general: 'An error occurred during signup. Please try again.',
+      }));
     }
   };
 
@@ -41,6 +91,9 @@ const Auth = () => {
           Event <span className="text-[#7848F4]">Hive</span>
         </div>
         <div className="text-6xl">Sign Up to Event Hive</div>
+        {errors.general && (
+          <div className="mt-4 text-red-500">{errors.general}</div>
+        )}
         <div className="pt-8">
           <div className="text-xl pb-4">YOUR NAME</div>
           <input
@@ -51,6 +104,7 @@ const Auth = () => {
             required
             onChange={handleChange}
           />
+          {errors.name && <div className="text-red-500 mt-1">{errors.name}</div>}
         </div>
         <div className="pt-4">
           <div className="text-xl pb-4">EMAIL</div>
@@ -62,6 +116,7 @@ const Auth = () => {
             required
             onChange={handleChange}
           />
+          {errors.email && <div className="text-red-500 mt-1">{errors.email}</div>}
         </div>
         <div className="pt-4">
           <div className="text-xl pb-4">PASSWORD</div>
@@ -73,6 +128,7 @@ const Auth = () => {
             required
             onChange={handleChange}
           />
+          {errors.password && <div className="text-red-500 mt-1">{errors.password}</div>}
         </div>
         <div className="pt-8 flex justify-center">
           <button
@@ -95,6 +151,7 @@ const Auth = () => {
           <div className="mt-6 flex justify-center">
             <button
               type="button"
+              onClick={() => navigate("/signin")}
               className="w-3/4 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-md font-medium text-white bg-[#7848F4] hover:bg-[#7848F4]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7848F4]"
             >
               Sign In
