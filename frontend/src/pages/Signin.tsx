@@ -1,14 +1,14 @@
-import Auth from "../components/Auth";
-import Sideimage from "../components/Sideimage";
+import Auth from "../components/SignInAuth";
+import Sideimage from "../components/SideImageSignin";
 
 const Signin = () => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 h-screen">
-      <div className="col-span-2">
-      <Sideimage />
+    <div className="grid grid-cols-1 lg:grid-cols-5 h-screen">
+      <div className="col-span-3">
+      <Auth />
       </div>
       <div className="col-span-2 hidden lg:block">
-        <Auth />
+      <Sideimage /> 
       </div>
     </div>
   );
