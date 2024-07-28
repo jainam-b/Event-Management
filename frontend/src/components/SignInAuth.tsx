@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { SigninType } from '@jainam-b/event-comman/dist';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { BACKEND_URL } from '../config';
 import Cookies from 'js-cookie';
+import { BACKEND_URL } from '../config';
 import { useAuth } from '../context/AuthContext';
 
 const Auth: React.FC = () => {
@@ -60,10 +60,20 @@ const Auth: React.FC = () => {
     }
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/v1/user/signin`, signinInputs);
-      Cookies.set('token', response.data.token);
-      setIsAuthenticated(true);
-      navigate('/');
+      const response = await axios.post(`${BACKEND_URL}/api/v1/user/signin`, signinInputs, {
+        withCredentials: true, // Ensure cookies are sent with the request
+      });
+
+      // Token will be in the cookie, you can access it with js-cookie
+      const token = Cookies.get('token');
+
+      if (token) {
+        axios.defaults.headers.common['Authorization'] = `${token}`;
+        setIsAuthenticated(true);
+        navigate('/');
+      } else {
+        throw new Error('Token not found');
+      }
     } catch (error) {
       console.error(error);
       setErrors((prevErrors) => ({

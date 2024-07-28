@@ -5,7 +5,7 @@ const AppBar = () => {
   const navigate = useNavigate();
   return (
     <div>
-      <nav className="bg-white  fixed w-full z-20 top-0 start-0  border-gray-200 dark:border-gray-600">
+      <nav className=" fixed w-full z-20 top-0 start-0  border-gray-200 dark:border-gray-600">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a
             href=" /"
