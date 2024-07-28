@@ -1,21 +1,34 @@
-import React from 'react'
-import AppBar from '../components/AppBar'
-import Banner from '../components/Banner'
-import SearchBar from '../components/SearchBar'
- 
+import React from "react";
+import AppBar from "../components/AppBar";
+import Banner from "../components/Banner";
+import SearchBar from "../components/SearchBar";
+import UpcommingEvents from "../components/UpcommingEvents";
+import CreateEventBanner from "../components/CreateEventBanner";
+import Footer from "../components/Footer";
+import TrendingEvents from "../components/TrendingEvents";
 
 const Home = () => {
-
-   
   return (
-    <div className='bg-[#F8F8FA]'>
+    <div className=" ">
       <div>
-     <div className='mb-16 '> <AppBar/> </div>
-      <Banner/>
-      {/* <div><SearchBar/></div> */}
+        <div className=" ">
+          {" "}
+          <AppBar />{" "}
+        </div>
+        <div className="">
+          <Banner />
+        </div>
+        <div className="mt-32 px-40 ">
+          <UpcommingEvents />
+        </div>
+        <div className="mt-10"><CreateEventBanner/></div>
+        <div className="mt-32 px-40 ">
+          <TrendingEvents />
+        </div>
+        <div className="mt-10" ><Footer/></div>
+      </div>
     </div>
-    </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

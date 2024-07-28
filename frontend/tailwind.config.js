@@ -8,4 +8,11 @@ export default {
     extend: {},
   },
   plugins: [],
+  width: {
+    '128': '28rem',
+  },
+  height: {
+    '128': '18.75rem',
+  }
+ 
 }
