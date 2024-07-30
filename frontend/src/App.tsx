@@ -6,6 +6,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home"; // Your home component
 import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
+import Event from "./pages/Event";
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
            
+            <Route path="/event" element={<Event />} />
             <Route path="/" element={<Home />} />
             {/* Add more protected routes here */}
            

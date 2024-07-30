@@ -18,8 +18,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchCookie = async () => {
     try {
       // Fetch the token from the server or API
-      const response = await axios.get(`${BACKEND_URL}/cookies`);
-      const token = response.data.token;
+      // const response = await axios.get(`${BACKEND_URL}/cookies`);
+      // const token = response.data.token;
 
       // Set the token in cookies or local storage
       if (token) {

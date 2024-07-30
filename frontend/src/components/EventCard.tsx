@@ -14,7 +14,7 @@ interface EventCardProps {
   const EventCard: React.FC<EventCardProps> = ({ imageURL, free, title, date, time, description }) => {
   return (
     <Link to="/">
-    <div className="w-128 h-[33.521rem]  bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5">
+    <div className="w-128   h-[26.521rem]  bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5">
       <div className="p-4 pb-6">
         <div className="mt-2">
           <div className="relative ">
