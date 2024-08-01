@@ -23,7 +23,7 @@ const Home = () => {
         </div>
         <div className="mt-10"><CreateEventBanner/></div>
         <div className="mt-32 px-40 ">
-          <TrendingEvents />
+          <TrendingEvents  title={"Trending"}/>
         </div>
         <div className="mt-10" ><Footer/></div>
       </div>

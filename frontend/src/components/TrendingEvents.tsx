@@ -2,11 +2,11 @@ import React from "react";
 import EventCard from "./EventCard";
 import eventImg from "../assets/card.png"
 import eventImg2 from "../assets/image3.png"
-const UpcommingEvents = () => {
+const UpcommingEvents = ({title}:{title:string}) => {
   return (
     <div>
-      <div className="text-5xl font-semibold font-sans whitespace-nowrap ">
-        Trending <span className="text-[#7848F4]">Event</span>
+      <div className="text-5xl ml-5 font-semibold font-sans whitespace-nowrap ">
+        {title} <span className="text-[#7848F4]">Event</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4p">
          <EventCard

@@ -1,8 +1,8 @@
 import React from "react";
 import map from "../assets/map.png";
-import img1 from "../assets/Vector-1.png"
-import img2 from "../assets/Vector-2.png"
-import img3 from "../assets/Vector.png"
+import facebook from "../assets/facebook.png"
+import insta from "../assets/insta.png"
+import whatsapp from "../assets/whatsapp.png"
 const EventLocation = () => {
   return (
     <div className="font-sans"> 
@@ -19,9 +19,9 @@ const EventLocation = () => {
     <div>
         <div className="text-3xl mt-5 ">Share with friends</div>
         <div className="flex flex-row ">
-            <img className="fill-black stroke-black" src={img1} alt="" />
-            <img src={img2} alt="" />
-            <img src={img3} alt="" />
+            <img className=" " src={facebook} alt="" />
+            <img src={insta} alt="" />
+            <img src={whatsapp} alt="" />
         </div>
     </div>
     </div>
