@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { Prisma, PrismaClient } from "@prisma/client/edge";
+import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
@@ -38,7 +38,7 @@ eventRouter.use("/*", async (c, next) => {
   await next();
 });
 
-// type fot ticket type
+// type for ticket type
 interface TicketType {
   name: string;
   price: number;
@@ -62,7 +62,18 @@ eventRouter.post("/create", async (c) => {
     });
   }
 
-  const { name, description, date, location, ticketTypes } = body;
+  const {
+    name,
+    description,
+    date,
+    startTime,
+    endTime,
+    imageUrl,
+    category,
+    organizer,
+    location,
+    ticketTypes,
+  } = body;
 
   // Convert and validate the date
   const { valid, date: eventDate, message } = convertAndValidateDate(date);
@@ -79,6 +90,11 @@ eventRouter.post("/create", async (c) => {
         name,
         description,
         date: eventDate!,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        imageUrl,
+        category,
+        organizer,
         location,
         ticketTypes: {
           create: ticketTypes.map((ticketType: TicketType) => ({
@@ -113,7 +129,7 @@ eventRouter.get("/events", async (c) => {
   return c.json(allEvents);
 });
 
-// api to get  events by ID
+// api to get events by ID
 eventRouter.get("/events/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -143,7 +159,18 @@ eventRouter.put("/events/:id", async (c) => {
     });
   }
 
-  const { name, description, date, location, ticketTypes } = body;
+  const {
+    name,
+    description,
+    date,
+    startTime,
+    endTime,
+    imageUrl,
+    category,
+    organizer,
+    location,
+    ticketTypes,
+  } = body;
 
   // Convert and validate the date
   const { valid, date: eventDate, message } = convertAndValidateDate(date);
@@ -164,6 +191,11 @@ eventRouter.put("/events/:id", async (c) => {
         name,
         description,
         date: eventDate,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        imageUrl,
+        category,
+        organizer,
         location,
       },
     });
@@ -214,33 +246,32 @@ eventRouter.put("/events/:id", async (c) => {
   }
 });
 
-eventRouter.delete("/events/:id",async(c)=>{
-  const eventId=   c.req.param("id");
+eventRouter.delete("/events/:id", async (c) => {
+  const eventId = c.req.param("id");
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
 
- try {
-  const deleteEvent= await prisma.event.delete({
-    where:{
-      id:eventId
-    }
-  })
-  return c.json({
-    msg:`Event delete successfully with ID: ${eventId}`
-  })
- } catch (error) {
-  c.status(500);
-  return c.json({
-    msg:"Error occured while deleting the event !!"
-  })
- }
+  try {
+    const deleteEvent = await prisma.event.delete({
+      where: {
+        id: eventId,
+      },
+    });
+    return c.json({
+      msg: `Event delete successfully with ID: ${eventId}`,
+    });
+  } catch (error) {
+    c.status(500);
+    return c.json({
+      msg: "Error occurred while deleting the event !!",
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
+});
 
-
-})
-
-
-// function to convert data into correct format 
+// function to convert date into correct format
 export function convertAndValidateDate(dateString: string): {
   valid: boolean;
   date?: Date;

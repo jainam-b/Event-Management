@@ -23,7 +23,7 @@ model User {
   updatedAt    DateTime      @updatedAt
   tickets      Ticket[]
   transactions Transaction[]
-  SeatMap      SeatMap[]
+  seatMap      SeatMap[]
 }
 
 enum userRole {
@@ -33,17 +33,22 @@ enum userRole {
 }
 
 model Event {
-  id           String        @id @default(uuid())
-  name         String
-  description  String?
-  location     String
-  date         DateTime
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  ticketTypes  TicketType[]
-  tickets      Ticket[]
-  transactions Transaction[]
-  seatMap      SeatMap[]
+  id                 String        @id @default(uuid())
+  name               String
+  description        String?
+  location           String
+  date               DateTime
+  startTime          DateTime
+  endTime            DateTime
+  imageUrl           String?
+  category           String
+  organizer          String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  ticketTypes        TicketType[]
+  tickets            Ticket[]
+  transactions       Transaction[]
+  seatMap            SeatMap[]
 }
 
 model TicketType {
