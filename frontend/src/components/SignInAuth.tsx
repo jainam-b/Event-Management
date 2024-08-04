@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { BACKEND_URL } from '../config';
-import { useAuth } from '../context/AuthContext';
 
 const Auth: React.FC = () => {
   const [signinInputs, setSigninInputs] = useState<SigninType>({
@@ -18,7 +17,6 @@ const Auth: React.FC = () => {
     general: '',
   });
 
-  const { setIsAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,27 +56,46 @@ const Auth: React.FC = () => {
     if (!validateInputs()) {
       return;
     }
-
+  
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/v1/user/signin`, signinInputs, {
-        withCredentials: true, // Ensure cookies are sent with the request
-      });
-
-      // Token will be in the cookie, you can access it with js-cookie
-      const token = Cookies.get('token');
-
-      if (token) {
-        axios.defaults.headers.common['Authorization'] = `${token}`;
-        setIsAuthenticated(true);
+      const response = await axios.post(`${BACKEND_URL}/api/v1/user/signin`, signinInputs);
+  
+      console.log('Response:', response.data);
+  
+      if (response.data.jwt) {
+        // Set the JWT token in a cookie
+        Cookies.set('token', response.data.jwt, { secure: true, sameSite: 'strict' });
+        
+        // Set the token in axios headers for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.jwt}`;
+        
+        // Navigate to the home page or dashboard
         navigate('/');
       } else {
-        throw new Error('Token not found');
+        throw new Error('JWT token not found in response');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error during signin:', error);
+      
+      let errorMessage = 'An error occurred during signin. Please try again.';
+  
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          errorMessage = error.response.data.message || errorMessage;
+        } else if (error.request) {
+          // The request was made but no response was received
+          errorMessage = 'No response received from server. Please check your network connection.';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errorMessage = error.message || errorMessage;
+        }
+      }
+  
       setErrors((prevErrors) => ({
         ...prevErrors,
-        general: 'An error occurred during signin. Please try again.',
+        general: errorMessage,
       }));
     }
   };

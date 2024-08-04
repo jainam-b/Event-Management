@@ -12,31 +12,31 @@ export const eventRouter = new Hono<{
   };
 }>();
 
-eventRouter.use("/*", async (c, next) => {
-  const token = getCookie(c, "token");
-  try {
-    if (!token) {
-      c.status(401);
-      return c.json({
-        Error: "unauthorized access, Please Signup!!",
-      });
-    }
-    const isValidToken = await verify(token, c.env.JWT_SECRET);
-    if (!isValidToken) {
-      c.status(401);
-      return c.json({
-        error: "Invalid token. Please log in again.",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    c.status(403);
-    return c.json({
-      message: "You are not logged in",
-    });
-  }
-  await next();
-});
+// eventRouter.use("/*", async (c, next) => {
+//   const token = getCookie(c, "token");
+//   try {
+//     if (!token) {
+//       c.status(401);
+//       return c.json({
+//         Error: "unauthorized access, Please Signup!!",
+//       });
+//     }
+//     const isValidToken = await verify(token, c.env.JWT_SECRET);
+//     if (!isValidToken) {
+//       c.status(401);
+//       return c.json({
+//         error: "Invalid token. Please log in again.",
+//       });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     c.status(403);
+//     return c.json({
+//       message: "You are not logged in",
+//     });
+//   }
+//   await next();
+// });
 
 // type for ticket type
 interface TicketType {

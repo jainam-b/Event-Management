@@ -1,12 +1,11 @@
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { userRouter } from "./routes/user";
-import { eventRouter } from "./routes/event";
-import { ticketTypeRouter } from "./routes/ticketType";
-import { ticketRouter } from "./routes/ticket";
-import { transactionRouter } from "./routes/transaction";
-import { seatMapRouter } from "./routes/seatmap";
-import { getCookie } from 'hono/cookie';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { userRouter } from './routes/user';
+import { eventRouter } from './routes/event';
+import { ticketTypeRouter } from './routes/ticketType';
+import { ticketRouter } from './routes/ticket';
+import { transactionRouter } from './routes/transaction';
+import { seatMapRouter } from './routes/seatmap';
 
 const app = new Hono<{
   Bindings: {
@@ -15,24 +14,20 @@ const app = new Hono<{
   };
 }>();
 
-app.use("/*", cors({
-  origin: 'http://127.0.0.1:5173', 
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+
+// Apply CORS middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Update this with your frontend URL
+  credentials: true // Allow credentials (cookies) to be sent
 }));
 
-app.route("/api/v1/user", userRouter);
-app.route("/api/v1/", eventRouter);
-app.route("/api/v1/", ticketTypeRouter);
-app.route("/api/v1/ticket", ticketRouter);
-app.route("/api/v1/transaction", transactionRouter);
-app.route("/api/v1/", seatMapRouter);
+// Ensure your route paths do not conflict
+app.route('/api/v1/user', userRouter);
 
-app.get('/cookies', (c) => {
-  const token = getCookie(c, 'token');
-  console.log(token);
-  return c.json({ token });
-});
+app.route('/api/v1/events', eventRouter); // Updated path to avoid overlap
+app.route('/api/v1/ticket-types', ticketTypeRouter); // Updated path
+app.route('/api/v1/tickets', ticketRouter); // Updated path
+app.route('/api/v1/transactions', transactionRouter); // Updated path
+app.route('/api/v1/seat-maps', seatMapRouter); // Updated path
 
 export default app;

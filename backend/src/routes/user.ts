@@ -43,22 +43,25 @@ userRouter.post("/signup", async (c) => {
     const token = await sign(
       { id: user.id, email: user.email, role: user.role },
       c.env.JWT_SECRET
+      // No expiresIn option for indefinite validity
     );
+
+
 
     setCookie(c, "token", token, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production", // Secure flag based on environment
-      sameSite: "None", // Use 'strict' for better security
+      sameSite: "None", // Adjust as needed
       path: "/", // Ensure the cookie is available throughout the site
     });
 
-    return c.json({ message: "Signup successfully" });
+    return c.json({ message: "Signup successfully" , jwt:token});
   } catch (e) {
     console.error("Error creating user:", e);
     c.status(500);
     return c.json({ msg: "Internal Server Error" });
   }
 });
+
 
 // Signin route
 userRouter.post("/signin", async (c) => {
@@ -93,19 +96,20 @@ userRouter.post("/signin", async (c) => {
     const token = await sign(
       { id: user.id, email: user.email, role: user.role },
       c.env.JWT_SECRET
+      // No expiresIn option for indefinite validity
     );
 
     setCookie(c, "token", token, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production", // Secure flag based on environment
-      sameSite: "None", // Use 'strict' for better security
+      sameSite: "None", // Adjust as needed
       path: "/", // Ensure the cookie is available throughout the site
     });
 
-    return c.json({ message: "Logged in successfully" });
+    return c.json({ message: "Signup successfully" , jwt:token});
   } catch (e) {
     console.error("Error logging in user:", e);
     c.status(500);
     return c.json({ msg: "Internal Server Error" });
   }
 });
+

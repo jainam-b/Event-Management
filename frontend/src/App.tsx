@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+// import { AuthProvider } from "./context/AuthContext";
 
 // import ProtectedRoute from "./context/ProtectedRoute";
 import Home from "./pages/Home"; // Your home component
@@ -11,7 +11,7 @@ import CreateEvent from "./pages/CreateEvent";
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
+     
       <Router>
         <Routes>
           <Route path="/signin" element={<Signin />} />
@@ -24,7 +24,7 @@ const App: React.FC = () => {
            
         </Routes>
       </Router>
-    </AuthProvider>
+    
   );
 };
 

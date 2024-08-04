@@ -1,7 +1,17 @@
 import React, { useState, ChangeEvent } from 'react';
 
 // Basic input component
-const Input = ({ title }: { title: string }) => {
+const Input = ({
+  title,
+  value,
+  onChange,
+  
+}: {
+  title: string;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+   
+}) => {
   return (
     <div className="mb-6">
       <label
@@ -11,7 +21,11 @@ const Input = ({ title }: { title: string }) => {
         {title}
       </label>
       <input
-        type="email"
+       
+       
+      value={value}
+      onChange={onChange}
+        type="text"
         id={title.replace(/\s+/g, '-').toLowerCase()}
         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
         placeholder={`Enter ${title}`}
@@ -155,6 +169,7 @@ export const BigInput = ({
     </div>
   );
 };
+ 
 
 
 export default Input;
