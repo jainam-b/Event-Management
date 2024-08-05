@@ -6,7 +6,7 @@ import SearchBar from './SearchBar';
     return (
       <div className='relative flex justify-center items-center   mx-auto'>
         <img 
-          className='mt-3 w-5/6 h-auto object-contain' 
+          className='mt-3 w-5/6 h-autos object-contain' 
           src={banner} 
           alt="Banner" 
         />
