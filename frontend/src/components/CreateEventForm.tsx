@@ -5,6 +5,10 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
 import { BACKEND_URL } from '../config';
+import Spinner from '../components/Spinner';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 type TicketType = {
   name: string;
@@ -26,6 +30,7 @@ const CreateEventForm: React.FC = () => {
   const [eventTitle, setEventTitle] = useState('Freshers');
   const [eventVenue, setEventVenue] = useState('The Mills');
   const [eventImage, setEventImage] = useState('');
+  const [loading, setLoading] = useState(false); // Initialize to false
 
   const handleTicketTypeChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -45,8 +50,9 @@ const CreateEventForm: React.FC = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    setLoading(true); // Set loading to true when submission starts
 
-    const formatDate = (date) => {
+    const formatDate = (date: Date) => {
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
       const year = date.getFullYear();
@@ -73,12 +79,31 @@ const CreateEventForm: React.FC = () => {
     try {
       const response = await axios.post(`${BACKEND_URL}/api/v1/events/create`, eventData, { withCredentials: true });
       console.log('Event created successfully:', response.data);
+      setTimeout(() => {
+        setLoading(false);
+        toast.success('Event created successfully!');
+      }, 500); // 500ms delay
       // Handle successful event creation (e.g., redirect or show a success message)
     } catch (error) {
       console.error('Error creating event:', error);
+      toast.error('Error creating event. Please try again.');
       // Handle error (e.g., show an error message)
+    } finally {
+      setLoading(false); // Set loading to false when form submission is complete
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center flex-col h-screen ">
+        <div className="flex justify-center">
+          <div>
+            <Spinner />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center mt-6 font-sans">
@@ -128,7 +153,7 @@ const CreateEventForm: React.FC = () => {
           </div>
           <div className='mt-10'>
             <div className='mb-3'>Event Image </div>
-            <div><InputImg onChange={(url) => setEventImage(url)} /></div>
+            <div><InputImg  /></div>
           </div>
           <div className='mt-10'>
             <BigInput 
@@ -192,6 +217,8 @@ const CreateEventForm: React.FC = () => {
           </button>
         </form>
       </div>
+        <ToastContainer />
+     
     </div>
   );
 }

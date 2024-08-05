@@ -8,6 +8,7 @@ import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
 import Event from "./pages/Event";
 import CreateEvent from "./pages/CreateEvent";
+import AllEvents from "./pages/AllEvents";
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
            
             <Route path="/event" element={<Event />} />
             <Route path="/create" element={<CreateEvent />} />
+            <Route path="/events" element={<AllEvents />} />
             <Route path="/" element={<Home />} />
             {/* Add more protected routes here */}
            

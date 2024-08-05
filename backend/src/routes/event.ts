@@ -121,7 +121,7 @@ eventRouter.post("/create", async (c) => {
 });
 
 // api to get all events
-eventRouter.get("/events", async (c) => {
+eventRouter.get("/", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
