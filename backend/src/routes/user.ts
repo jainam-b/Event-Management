@@ -13,8 +13,6 @@ export const userRouter = new Hono<{
   };
 }>();
 
-
-
 // Signup route
 userRouter.post("/signup", async (c) => {
   const prisma = new PrismaClient({
@@ -24,7 +22,7 @@ userRouter.post("/signup", async (c) => {
   const { success } = signupInput.safeParse(body);
 
   if (!success) {
-    c.status(400); // Use 400 for bad request
+    c.status(400);
     return c.json({ msg: "Incorrect Inputs" });
   }
 
@@ -42,26 +40,25 @@ userRouter.post("/signup", async (c) => {
 
     const token = await sign(
       { id: user.id, email: user.email, role: user.role },
-      c.env.JWT_SECRET
-      // No expiresIn option for indefinite validity
+      c.env.JWT_SECRET,
+     
     );
-
-
 
     setCookie(c, "token", token, {
       httpOnly: true,
-      sameSite: "None", // Adjust as needed
-      path: "/", // Ensure the cookie is available throughout the site
+      secure: true, // Ensure the cookie is sent only over HTTPS
+      sameSite: "None",
+      path: "/",
+      maxAge: 3600, // Cookie expiration time in seconds (1 hour here)
     });
 
-    return c.json({ message: "Signup successfully" , jwt:token});
+    return c.json({ message: "Signup successfully", jwt: token });
   } catch (e) {
     console.error("Error creating user:", e);
     c.status(500);
     return c.json({ msg: "Internal Server Error" });
   }
 });
-
 
 // Signin route
 userRouter.post("/signin", async (c) => {
@@ -72,7 +69,7 @@ userRouter.post("/signin", async (c) => {
   const { success } = signinInput.safeParse(body);
 
   if (!success) {
-    c.status(400); // Use 400 for bad request
+    c.status(400);
     return c.json({ msg: "Incorrect Inputs" });
   }
 
@@ -95,21 +92,22 @@ userRouter.post("/signin", async (c) => {
 
     const token = await sign(
       { id: user.id, email: user.email, role: user.role },
-      c.env.JWT_SECRET
-      // No expiresIn option for indefinite validity
+      c.env.JWT_SECRET,
+      
     );
 
     setCookie(c, "token", token, {
       httpOnly: true,
-      sameSite: "None", // Adjust as needed
-      path: "/", // Ensure the cookie is available throughout the site
+      secure: true, // Ensure the cookie is sent only over HTTPS
+      sameSite: "None",
+      path: "/",
+      maxAge: 3600, // Cookie expiration time in seconds (1 hour here)
     });
 
-    return c.json({ message: "Signup successfully" , jwt:token});
+    return c.json({ message: "Signin successfully", jwt: token });
   } catch (e) {
     console.error("Error logging in user:", e);
     c.status(500);
     return c.json({ msg: "Internal Server Error" });
   }
 });
-
