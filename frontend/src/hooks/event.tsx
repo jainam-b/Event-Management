@@ -15,7 +15,6 @@ interface Event {
   organizer: string;
   createdAt: string;
   updatedAt: string;
-   
 }
 
 const useEvents = () => {
@@ -26,7 +25,7 @@ const useEvents = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get<Event[]>(`${BACKEND_URL}/api/v1/events`); // Adjust the API endpoint as needed
+        const response = await axios.get<Event[]>(`${BACKEND_URL}/api/v1/events`);
         setEvents(response.data);
       } catch (err) {
         setError(err as Error);
@@ -42,3 +41,27 @@ const useEvents = () => {
 };
 
 export default useEvents;
+
+
+interface TrendingEventsProps {
+  title: string;
+  events: Event[];
+}
+
+export const TrendingEvents: React.FC<TrendingEventsProps> = ({ title, events }) => {
+  return (
+    <div>
+      <h2>{title}</h2>
+      <ul>
+        {events.map(event => (
+          <li key={event.id}>
+            <h3>{event.name}</h3>
+            <p>{event.location}</p>
+            {/* Display other event details as needed */}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+

@@ -3,6 +3,7 @@ import eventImg from "../assets/card.png";
 import { Link } from 'react-router-dom';
 
 interface EventCardProps {
+    id:string
     imageURL: string;
     free?: boolean;
     title: string;
@@ -11,9 +12,9 @@ interface EventCardProps {
     description?: string;
   }
 
-  const EventCard: React.FC<EventCardProps> = ({ imageURL, free, title, date, time, description }) => {
+  const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free, title, date, time, description }) => {
   return (
-    <Link to="/event">
+    <Link to={`/event/${id}`}>
     <div className="w-128   h-full max-h-[28rem] mb-4  bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5">
       <div className="p-4 pb-6">
         <div className="mt-2">

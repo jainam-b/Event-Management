@@ -21,7 +21,7 @@ const App: React.FC = () => {
           <Route path="/auth" element={<AuthStatus />} />
           
           <Route element={<ProtectedRoute />}>
-            <Route path="/event" element={<Event />} />
+            <Route path="/event/:id" element={<Event />} />
             <Route path="/create" element={<CreateEvent />} />
             <Route path="/events" element={<AllEvents />} />
           </Route>

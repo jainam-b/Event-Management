@@ -39,6 +39,7 @@ const AllEvents = () => {
         {events.map((event) => (
           <EventCard
             key={event.id}
+            id={event.id}
             imageURL={
               event.imageUrl ||
               "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZXZlbnR8ZW58MHx8MHx8fDA%3D"
