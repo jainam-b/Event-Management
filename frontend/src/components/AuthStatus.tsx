@@ -6,7 +6,8 @@ import SignupModal from "./SignupModal";
 const AuthStatus: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const [showModal, setShowModal] = useState<boolean>(false);
-
+  console.log("auth in auth stauts",isAuthenticated);
+  
   useEffect(() => {
     if (!isAuthenticated) {
       const timer = setTimeout(() => {
