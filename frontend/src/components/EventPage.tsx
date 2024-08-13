@@ -7,12 +7,21 @@ import EventLocation from './EventLocation';
 import Footer from './Footer';
 import TrendingEvents from './TrendingEvents'; // Ensure this is correctly imported
 import useEvents from '../hooks/event';
+import Spinner from './Spinner';
 
 const EventPage: React.FC = () => {
   const { events, loading, error } = useEvents();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center flex-col h-screen ">
+        <div className="flex justify-center">
+          <div>
+            <Spinner />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -27,7 +36,10 @@ const EventPage: React.FC = () => {
       <AppBar />
  
      {event && (
-       <EventBanner  img={bannerimg} 
+       <EventBanner  img={ 
+        event.imageUrl ||
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZXZlbnR8ZW58MHx8MHx8fDA%3D"
+      } 
        name={event.name || 'No description available'}
        description={event.description || 'No description available'}
        startdate={event.startTime || 'No hours available'} /> 
@@ -48,7 +60,7 @@ const EventPage: React.FC = () => {
         </div>
       </div>
       <div className="mt-20 mr-10">
-        <TrendingEvents title="Other" events={events} />
+        <TrendingEvents title="Other"  />
       </div>
       <Footer />
     </div>
