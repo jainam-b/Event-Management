@@ -23,18 +23,27 @@ const useEvents = () => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get<Event[]>(`${BACKEND_URL}/api/v1/events`);
-        setEvents(response.data);
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Check if we already have events data in local storage or state
+    const cachedEvents = localStorage.getItem("events");
 
-    fetchEvents();
+    if (cachedEvents) {
+      setEvents(JSON.parse(cachedEvents));
+      setLoading(false);
+    } else {
+      const fetchEvents = async () => {
+        try {
+          const response = await axios.get<Event[]>(`${BACKEND_URL}/api/v1/events`);
+          setEvents(response.data);
+          localStorage.setItem("events", JSON.stringify(response.data)); // Cache events in local storage
+        } catch (err) {
+          setError(err as Error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchEvents();
+    }
   }, []);
 
   return { events, loading, error };
