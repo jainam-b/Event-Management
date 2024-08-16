@@ -1,10 +1,25 @@
-import React from "react";
+
 import EventCard from "./EventCard";
-import eventImg from "../assets/card.png"
-import eventImg2 from "../assets/image3.png"
+
+
 import useEvents from "../hooks/event";
+import Spinner from "./Spinner";
 const UpcommingEvents = ({title}:{title:string}) => {
   const { events, loading, error } = useEvents();
+  if (loading) {
+    return (
+      <div className="flex justify-center flex-col h-screen ">
+        <div className="flex justify-center">
+          <div>
+            <Spinner />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
   return (
     <div>
       <div className="text-5xl ml-5 font-semibold font-sans whitespace-nowrap ">

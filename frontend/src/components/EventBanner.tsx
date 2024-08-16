@@ -1,4 +1,4 @@
-import React from "react";
+
 import backicon from "../assets/Vector (Stroke).png";
 import mappin from "../assets/MapPin.svg";
 

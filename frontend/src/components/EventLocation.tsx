@@ -1,4 +1,4 @@
-import React from "react";
+
 import facebook from "../assets/facebook.png";
 import insta from "../assets/insta.png";
 import whatsapp from "../assets/whatsapp.png";

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import AppBar from "../components/AppBar";
 import Banner from "../components/Banner";
-import SearchBar from "../components/SearchBar";
+
 import UpcommingEvents from "../components/UpcommingEvents";
 import CreateEventBanner from "../components/CreateEventBanner";
 import Footer from "../components/Footer";
@@ -10,9 +10,10 @@ import { getCookie } from "../utils/cookies";
 import SignupModal from "../components/SignupModal";
 
 const Home = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated ,setIsAuthenticated] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
-
+  console.log(isAuthenticated);
+  
   useEffect(() => {
     const token = getCookie('token');
     setIsAuthenticated(!!token);

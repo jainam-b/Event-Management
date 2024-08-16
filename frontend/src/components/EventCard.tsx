@@ -11,7 +11,7 @@ interface EventCardProps {
   description?: string;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free, title, date, time, description }) => {
+const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free, title, date, description }) => {
   return (
     <Link to={`/event/${id}`}>
       <div className="w-128 h-[22rem] bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5">

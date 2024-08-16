@@ -1,8 +1,8 @@
-import React from "react";
+
 import AppBar from "../components/AppBar";
 import AllEventsBanner from "../components/AllEventsBanner";
 import EventCard from "../components/EventCard";
-import eventImg from "../assets/card.png";
+;
 import useEvents from "../hooks/event";
 import Spinner from "../components/Spinner";
 

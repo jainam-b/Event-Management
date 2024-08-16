@@ -29,7 +29,7 @@ const CreateEventForm: React.FC = () => {
   const [eventDescription, setEventDescription] = useState('SICSR fresher party');
   const [eventTitle, setEventTitle] = useState('Freshers');
   const [eventVenue, setEventVenue] = useState('The Mills');
-  const [eventImage, setEventImage] = useState('');
+
   const [loading, setLoading] = useState(false); // Initialize to false
 
   const handleTicketTypeChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {

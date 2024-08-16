@@ -1,4 +1,4 @@
-import React from "react";
+
 import sideimg from "../assets/signupimage.png";
 
 const Sideimage = () => {

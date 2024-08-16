@@ -1,7 +1,7 @@
 import React from 'react';
 import AppBar from './AppBar';
 import EventBanner from './EventBanner';
-import bannerimg from '../assets/card.png';
+
 import EventDescription from './EventDescription';
 import EventLocation from './EventLocation';
 import Footer from './Footer';

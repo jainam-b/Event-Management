@@ -1,4 +1,4 @@
-import React from 'react';
+
 import eventBannerImg from '../assets/image 3.png'; // Update the path to your image file
 import { useNavigate } from 'react-router-dom';
 
