@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SigninType } from '@jainam-b/event-comman/dist';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -18,6 +18,15 @@ const Auth: React.FC = () => {
   });
 
   const navigate = useNavigate();
+
+  // Check for token and set it on component mount
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      navigate('/'); // Redirect to home or dashboard
+    }
+  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -69,8 +78,8 @@ const Auth: React.FC = () => {
         // Set the token in axios headers for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.jwt}`;
         
-        // Navigate to the home page or dashboard
-        navigate('/');
+        // Reload the page to apply the changes
+        window.location.reload();
       } else {
         throw new Error('JWT token not found in response');
       }
@@ -81,14 +90,10 @@ const Auth: React.FC = () => {
   
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
           errorMessage = error.response.data.message || errorMessage;
         } else if (error.request) {
-          // The request was made but no response was received
           errorMessage = 'No response received from server. Please check your network connection.';
         } else {
-          // Something happened in setting up the request that triggered an Error
           errorMessage = error.message || errorMessage;
         }
       }
@@ -99,6 +104,7 @@ const Auth: React.FC = () => {
       }));
     }
   };
+  
 
   return (
     <div className="h-screen flex items-center justify-center bg-[#F8F8FA]">

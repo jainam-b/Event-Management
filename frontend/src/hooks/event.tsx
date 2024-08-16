@@ -23,31 +23,32 @@ const useEvents = () => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Check if we already have events data in local storage or state
-    const cachedEvents = localStorage.getItem("events");
-
-    if (cachedEvents) {
-      setEvents(JSON.parse(cachedEvents));
-      setLoading(false);
-    } else {
-      const fetchEvents = async () => {
-        try {
-          const response = await axios.get<Event[]>(`${BACKEND_URL}/api/v1/events`);
-          setEvents(response.data);
-          localStorage.setItem("events", JSON.stringify(response.data)); // Cache events in local storage
-        } catch (err) {
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get<Event[]>(`${BACKEND_URL}/api/v1/events`);
+        setEvents(response.data);
+        localStorage.setItem("events", JSON.stringify(response.data)); // Cache events in local storage
+      } catch (err) {
+        // If there is an error and we have cached data, use that instead
+        const cachedEvents = localStorage.getItem("events");
+        if (cachedEvents) {
+          setEvents(JSON.parse(cachedEvents));
+        } else {
           setError(err as Error);
-        } finally {
-          setLoading(false);
         }
-      };
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      fetchEvents();
-    }
+    fetchEvents();
   }, []);
 
   return { events, loading, error };
 };
+
+
+
 
 export default useEvents;
 
@@ -73,4 +74,3 @@ export const TrendingEvents: React.FC<TrendingEventsProps> = ({ title, events })
     </div>
   );
 };
-

@@ -111,3 +111,26 @@ userRouter.post("/signin", async (c) => {
     return c.json({ msg: "Internal Server Error" });
   }
 });
+
+
+userRouter.get("/:email",async(c)=>{
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+  const email=c.req.param("email");
+  try {
+    const user=await prisma.user.findUnique({
+      where:{email:email}
+    })
+    if (!user) {
+      c.status(401);
+      return c.json({ msg: "Email not found " });
+    }
+    return c.json(user)
+
+  } catch (error) {
+    console.error("Error logging in user:", error);
+    c.status(500);
+    return c.json({ msg: "Internal Server Error" });
+  }
+})

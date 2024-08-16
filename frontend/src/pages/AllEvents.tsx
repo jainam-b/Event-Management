@@ -5,10 +5,11 @@ import EventCard from "../components/EventCard";
 ;
 import useEvents from "../hooks/event";
 import Spinner from "../components/Spinner";
+import Footer from "../components/Footer";
 
 const AllEvents = () => {
   const { events, loading, error } = useEvents();
-
+  console.log(events)
   if (loading)
     return (
       <p>
@@ -52,6 +53,7 @@ const AllEvents = () => {
           />
         ))}
       </div>
+      <Footer/>
     </div>
   );
 };
