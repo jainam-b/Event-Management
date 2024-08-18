@@ -21,30 +21,37 @@ const dateSchema = z
   .string()
   .regex(dateFormatRegex, "Date must be in dd/mm/yyyy format");
 
-export const createEventSchema = z.object({
-  name: z.string().min(1, "Event name is required"),
-  description: z.string().optional(),
-  date: dateSchema,
-  location: z.string().min(1, "Location is required"),
-  ticketTypes: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Ticket type name is required"),
-        price: z.number().nonnegative("Price must be a non-negative number"),
-        totalQuantity: z
-          .number()
-          .int()
-          .nonnegative("Total quantity must be a non-negative integer"),
-        availableQuantity: z
-          .number()
-          .int()
-          .nonnegative("Available quantity must be a non-negative integer"),
-      })
-    )
-    .min(1, "At least one ticket type is required"),
-});
+  export const createEventSchema = z.object({
+    name: z.string().min(1, "Event name is required"),
+    description: z.string().optional(),
+    date: dateSchema,
+    startTime: z.string(), // Ensure you handle these fields if needed
+    endTime: z.string(),   // Ensure you handle these fields if needed
+    location: z.string().min(1, "Location is required"),
+    category: z.string().optional(), // Add category field
+    organizer: z.string().optional(), // Add organizer field
+    ticketTypes: z
+      .array(
+        z.object({
+          name: z.string().min(1, "Ticket type name is required"),
+          price: z.number().nonnegative("Price must be a non-negative number"),
+          totalQuantity: z
+            .number()
+            .int()
+            .nonnegative("Total quantity must be a non-negative integer"),
+          availableQuantity: z
+            .number()
+            .int()
+            .nonnegative("Available quantity must be a non-negative integer"),
+        })
+      )
+      .min(1, "At least one ticket type is required"),
+  });
+  
+  export type CreateEventSchemaType = z.infer<typeof createEventSchema>;
+  
 
-export type CreateEventSchemaType = z.infer<typeof createEventSchema>;
+
 
 export const ticketType = z.object({
   name: z.string().min(1, "Ticket type name is required"),

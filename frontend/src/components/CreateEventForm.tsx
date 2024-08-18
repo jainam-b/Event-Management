@@ -1,14 +1,13 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import Input from './Input';
-import { SmallInput, BigInput, InputImg } from './Input';
+import { SmallInput, BigInput } from './Input';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
-import { BACKEND_URL } from '../config';
+import { BACKEND_URL, CLOUDINARY_CLOUD_NAME } from '../config';
 import Spinner from '../components/Spinner';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 
 type TicketType = {
   name: string;
@@ -19,7 +18,7 @@ type TicketType = {
 
 const CreateEventForm: React.FC = () => {
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
-    { name: 'student', price: '100', totalQuantity: '100', availableQuantity: '100' }
+    { name: 'Student', price: '100', totalQuantity: '100', availableQuantity: '100' }
   ]);
 
   const [startTime, setStartTime] = useState('2024-08-04T19:00:00Z');
@@ -30,7 +29,34 @@ const CreateEventForm: React.FC = () => {
   const [eventTitle, setEventTitle] = useState('Freshers');
   const [eventVenue, setEventVenue] = useState('The Mills');
 
-  const [loading, setLoading] = useState(false); // Initialize to false
+  const [loading, setLoading] = useState(false);
+  const [eventImage, setEventImage] = useState<File | null>(null);
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files?.length) {
+      setEventImage(event.target.files[0]);
+    }
+  };
+
+  async function uploadImageToCloudinary(image: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', image);
+    formData.append('upload_preset', 'ml_default');
+    formData.append('folder', "Event");
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      return result.secure_url;
+    } else {
+      throw new Error(result.error?.message || 'Unknown error occurred during upload');
+    }
+  }
 
   const handleTicketTypeChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -50,11 +76,23 @@ const CreateEventForm: React.FC = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    setLoading(true); // Set loading to true when submission starts
+    setLoading(true);
+
+    let imageUrl = '';
+    if (eventImage) {
+      try {
+        imageUrl = await uploadImageToCloudinary(eventImage);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        toast.error('Error uploading image.');
+        setLoading(false);
+        return;
+      }
+    }
 
     const formatDate = (date: Date) => {
       const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
       return `${day}/${month}/${year}`;
     };
@@ -66,8 +104,9 @@ const CreateEventForm: React.FC = () => {
       date: formatDate(new Date()) || '02/02/2024',
       startTime: new Date(startTime).toISOString(),
       endTime: new Date(endTime).toISOString(),
+      imageUrl,
       category: eventCategory,
-      organizer: 'Tech Events Ltd.', // Replace with dynamic value if needed
+      organizer: 'Tech Events Ltd.',
       ticketTypes: ticketTypes.map(ticket => ({
         ...ticket,
         price: parseFloat(ticket.price),
@@ -79,28 +118,19 @@ const CreateEventForm: React.FC = () => {
     try {
       const response = await axios.post(`${BACKEND_URL}/api/v1/events/create`, eventData, { withCredentials: true });
       console.log('Event created successfully:', response.data);
-      setTimeout(() => {
-        setLoading(false);
-        toast.success('Event created successfully!');
-      }, 500); // 500ms delay
-      // Handle successful event creation (e.g., redirect or show a success message)
+      toast.success('Event created successfully!');
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error('Error creating event. Please try again.');
-      // Handle error (e.g., show an error message)
     } finally {
-      setLoading(false); // Set loading to false when form submission is complete
+      setLoading(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center flex-col h-screen ">
-        <div className="flex justify-center">
-          <div>
-            <Spinner />
-          </div>
-        </div>
+      <div className="flex justify-center items-center h-screen">
+        <Spinner />
       </div>
     );
   }
@@ -109,7 +139,7 @@ const CreateEventForm: React.FC = () => {
     <div className="flex flex-col items-center mt-6 font-sans">
       <div className="text-3xl font-semibold mb-4">Create Event</div>
       <div className="w-full max-w-2xl mt-6">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             title="Event Title"
             value={eventTitle}
@@ -120,22 +150,22 @@ const CreateEventForm: React.FC = () => {
             value={eventVenue}
             onChange={(e) => setEventVenue(e.target.value)}
           />
-          <div className='flex space-x-4 mt-6 w-full'>
-            <SmallInput 
-              title='Start Time' 
-              name='startTime' 
-              value={startTime} 
-              onChange={(e) => setStartTime(e.target.value)} 
+          <div className="flex space-x-4">
+            <SmallInput
+              title="Start Time"
+              name="startTime"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
             />
-            <SmallInput 
-              title='End Time' 
-              name='endTime' 
-              value={endTime} 
-              onChange={(e) => setEndTime(e.target.value)} 
+            <SmallInput
+              title="End Time"
+              name="endTime"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
             />
           </div>
-          <div className='flex flex-col mt-6 w-full'>
-            <div className='mb-2 text-sm font-medium text-gray-900'>Date</div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-900">Date</label>
             <DatePicker
               selected={eventDate}
               onChange={(date: Date | null) => setEventDate(date)}
@@ -143,84 +173,71 @@ const CreateEventForm: React.FC = () => {
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             />
           </div>
-          <div className='flex space-x-4 mt-6 w-full'>
-            <SmallInput 
-              title='Event Category' 
-              name='eventCategory' 
-              value={eventCategory} 
-              onChange={(e) => setEventCategory(e.target.value)} 
-            />
+          <SmallInput
+            title="Event Category"
+            name="eventCategory"
+            value={eventCategory}
+            onChange={(e) => setEventCategory(e.target.value)}
+          />
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-900">Event Image</label>
+            <input type="file" onChange={handleImageChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5" />
           </div>
-          <div className='mt-10'>
-            <div className='mb-3'>Event Image </div>
-            <div><InputImg  /></div>
-          </div>
-          <div className='mt-10'>
-            <BigInput 
-              title='Event Description' 
-              name='eventDescription' 
-              value={eventDescription} 
-              onChange={(e) => setEventDescription(e.target.value)} 
-            />
-          </div>
-          <div className='mt-10'>
-            <div className='mb-3 text-lg font-medium'>Ticket Types</div>
+          <BigInput
+            title="Event Description"
+            name="eventDescription"
+            value={eventDescription}
+            onChange={(e) => setEventDescription(e.target.value)}
+          />
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-900">Ticket Types</label>
             {ticketTypes.map((ticketType, index) => (
-              <div key={index} className='flex items-center space-x-4 mt-6 w-full'>
-                <div className='flex-1'>
-                  <SmallInput 
-                    title='Ticket Name' 
-                    name='name' 
-                    value={ticketType.name} 
-                    onChange={(e) => handleTicketTypeChange(index, e)} 
-                  />
-                </div>
-                <div className='flex-1'>
-                  <SmallInput 
-                    title='Price' 
-                    name='price' 
-                    value={ticketType.price} 
-                    onChange={(e) => handleTicketTypeChange(index, e)} 
-                  />
-                </div>
-                <div className='flex-1'>
-                  <SmallInput 
-                    title='Total Quantity' 
-                    name='totalQuantity' 
-                    value={ticketType.totalQuantity} 
-                    onChange={(e) => handleTicketTypeChange(index, e)} 
-                  />
-                </div>
-                <div className='flex-1'>
-                  <SmallInput 
-                    title='Available Quantity' 
-                    name='availableQuantity' 
-                    value={ticketType.availableQuantity} 
-                    onChange={(e) => handleTicketTypeChange(index, e)} 
-                  />
-                </div>
-                <button 
-                  onClick={() => handleRemoveTicketType(index)} 
-                  className='text-red-500 ml-2 mt-5'
-                  title='Remove Ticket Type'
+              <div key={index} className="flex items-center space-x-4 mb-4">
+                <SmallInput
+                  title="Ticket Name"
+                  name="name"
+                  value={ticketType.name}
+                  onChange={(e) => handleTicketTypeChange(index, e)}
+                />
+                <SmallInput
+                  title="Price"
+                  name="price"
+                  value={ticketType.price}
+                  onChange={(e) => handleTicketTypeChange(index, e)}
+                />
+                <SmallInput
+                  title="Total Quantity"
+                  name="totalQuantity"
+                  value={ticketType.totalQuantity}
+                  onChange={(e) => handleTicketTypeChange(index, e)}
+                />
+                <SmallInput
+                  title="Available Quantity"
+                  name="availableQuantity"
+                  value={ticketType.availableQuantity}
+                  onChange={(e) => handleTicketTypeChange(index, e)}
+                />
+                <button
+                  onClick={() => handleRemoveTicketType(index)}
+                  className="text-red-500"
+                  title="Remove Ticket Type"
                 >
                   ✕
                 </button>
               </div>
             ))}
-            <button type="button" onClick={handleAddTicketType} className="mt-4 bg-[#7848F4] text-white py-2 px-4 rounded">
+            <button type="button" onClick={handleAddTicketType} className="bg-[#7848F4] text-white py-2 px-4 rounded">
               Add Ticket Type
             </button>
           </div>
-          <button type="submit" className="mt-10 w-full bg-[#7848F4] text-white py-2 px-4 text-xl rounded">
-            Create Event 
+          <button type="submit" className="w-full bg-[#7848F4] text-white py-2 px-4 rounded">
+            Create Event
           </button>
         </form>
       </div>
-        <ToastContainer />
-     
+      <ToastContainer />
     </div>
   );
-}
+};
 
 export default CreateEventForm;

@@ -1,6 +1,6 @@
 name = "event-management"
 compatibility_date = "2024-07-20"
- 
+
 [vars]
 DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiZWUzYzY2ZTgtYmEyZS00Mjk3LWI1MzUtMWUwOTc3Mjk3NjRjIiwidGVuYW50X2lkIjoiYjcxOWNjMGRmMDgwZmMzNWMwY2Q0YmQ0YTNmNmU2Yzc4MDQ0YTA3Yzg2NjMyZTc5MDRkZWU0MDM1N2QxZTM5MyIsImludGVybmFsX3NlY3JldCI6ImNkMjE5YWUwLWNkNDgtNDI0ZS1hNjY5LTI4ZjRlZTE1MDQwMiJ9.EMP-tGMfrdblZJiN8TJTogKdEnOGA1GAUqG8KbP7l84"
 

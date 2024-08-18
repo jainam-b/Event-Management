@@ -35,18 +35,20 @@ const Input = ({
   );
 };
 
- 
+interface InputImgProps {
+  onImageChange: (file: File | null) => void;
+  preview: string;
+}
 
 // Image input component with preview
-export const InputImg = () => {
-  const [preview, setPreview] = useState<string>('');
-
+export const InputImg: React.FC<InputImgProps> = ({ onImageChange, preview }) => {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      onImageChange(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreview(reader.result as string);
+        onImageChange(file);
       };
       reader.readAsDataURL(file);
     }

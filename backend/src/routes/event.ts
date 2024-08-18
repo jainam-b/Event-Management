@@ -1,44 +1,34 @@
-import { Hono } from "hono";
-import { PrismaClient } from "@prisma/client/edge";
-import { withAccelerate } from "@prisma/extension-accelerate";
-import { getCookie } from "hono/cookie";
-import { verify } from "hono/jwt";
-import { createEventSchema } from "@jainam-b/event-comman/dist";
+import { Hono } from 'hono';
+import { PrismaClient } from '@prisma/client/edge';
+import { withAccelerate } from '@prisma/extension-accelerate';
+import { createEventSchema, CreateEventSchemaType } from '@jainam-b/event-comman/dist';
 
 export const eventRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
     JWT_SECRET: string;
+    CLOUDINARY_CLOUD_NAME: string;
+    CLOUDINARY_API_KEY: string;
+    CLOUDINARY_API_SECRET: string;
   };
 }>();
 
-// eventRouter.use("/*", async (c, next) => {
-//   const token = getCookie(c, "token");
-//   try {
-//     if (!token) {
-//       c.status(401);
-//       return c.json({
-//         Error: "unauthorized access, Please Signup!!",
-//       });
-//     }
-//     const isValidToken = await verify(token, c.env.JWT_SECRET);
-//     if (!isValidToken) {
-//       c.status(401);
-//       return c.json({
-//         error: "Invalid token. Please log in again.",
-//       });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     c.status(403);
-//     return c.json({
-//       message: "You are not logged in",
-//     });
-//   }
-//   await next();
-// });
+// Custom function to convert FormData to an object
+async function formDataToObject(formData: FormData): Promise<Record<string, any>> {
+  const obj: Record<string, any> = {};
+  for (const [key, value] of (formData as any).entries()) {
+    obj[key] = value;
+  }
+  return obj;
+}
 
-// type for ticket type
+// Define the expected Cloudinary response type
+interface CloudinaryResponse {
+  secure_url: string;
+  error?: {
+    message: string;
+  };
+}
 interface TicketType {
   name: string;
   price: number;
@@ -46,6 +36,10 @@ interface TicketType {
   availableQuantity: number;
 }
 
+
+ 
+
+// Route to create event
 // route to create event
 eventRouter.post("/create", async (c) => {
   const prisma = new PrismaClient({
@@ -120,8 +114,9 @@ eventRouter.post("/create", async (c) => {
   }
 });
 
-// api to get all events
-eventRouter.get("/", async (c) => {
+
+// API to get all events
+eventRouter.get('/', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -129,32 +124,33 @@ eventRouter.get("/", async (c) => {
   return c.json(allEvents);
 });
 
-// api to get events by ID
-eventRouter.get("/events/:id", async (c) => {
+// API to get events by ID
+eventRouter.get('/events/:id', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
-  const eventId = c.req.param("id");
-  const eventbyId = await prisma.event.findFirst({
+  const eventId = c.req.param('id');
+  const eventById = await prisma.event.findFirst({
     where: {
       id: eventId,
     },
   });
-  return c.json(eventbyId);
+  return c.json(eventById);
 });
 
-eventRouter.put("/events/:id", async (c) => {
+// API to update event
+eventRouter.put('/events/:id', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
   const body = await c.req.json();
   const { success, error } = createEventSchema.safeParse(body);
-  const eventId = c.req.param("id");
+  const eventId = c.req.param('id');
 
   if (!success) {
-    c.status(411);
+    c.status(400); // Use 400 Bad Request for invalid inputs
     return c.json({
-      msg: "Error Invalid inputs",
+      msg: 'Error Invalid inputs',
       error: error.errors,
     });
   }
@@ -231,14 +227,14 @@ eventRouter.put("/events/:id", async (c) => {
 
     c.status(200);
     return c.json({
-      msg: "Event updated successfully",
+      msg: 'Event updated successfully',
       event: updateEvent,
     });
   } catch (error: any) {
     console.error(error);
     c.status(500); // Internal Server Error
     return c.json({
-      msg: "An error occurred while updating the event",
+      msg: 'An error occurred while updating the event',
       error: error.message,
     });
   } finally {
@@ -246,8 +242,9 @@ eventRouter.put("/events/:id", async (c) => {
   }
 });
 
-eventRouter.delete("/events/:id", async (c) => {
-  const eventId = c.req.param("id");
+// API to delete event
+eventRouter.delete('/events/:id', async (c) => {
+  const eventId = c.req.param('id');
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -259,37 +256,31 @@ eventRouter.delete("/events/:id", async (c) => {
       },
     });
     return c.json({
-      msg: `Event delete successfully with ID: ${eventId}`,
+      msg: `Event deleted successfully with ID: ${eventId}`,
     });
   } catch (error) {
     c.status(500);
     return c.json({
-      msg: "Error occurred while deleting the event !!",
+      msg: 'Error occurred while deleting the event',
     });
   } finally {
     await prisma.$disconnect();
   }
 });
 
-// function to convert date into correct format
+// Function to convert date into correct format
 export function convertAndValidateDate(dateString: string): {
   valid: boolean;
   date?: Date;
   message?: string;
 } {
-  const [day, month, year] = dateString.split("/");
+  const [day, month, year] = dateString.split('/');
   const formattedDate = `${year}-${month}-${day}`;
   const date = new Date(formattedDate);
 
   if (isNaN(date.getTime())) {
-    return {
-      valid: false,
-      message: "Invalid date format",
-    };
+    return { valid: false, message: 'Invalid date format. Expected DD/MM/YYYY.' };
   }
 
-  return {
-    valid: true,
-    date,
-  };
+  return { valid: true, date };
 }
