@@ -52,6 +52,36 @@ const useEvents = () => {
 
 export default useEvents;
 
+export const useEventById = (eventId: string) => {
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const response = await axios.get<Event>(`${BACKEND_URL}/api/v1/events/${eventId}`);
+        setEvent(response.data);
+        localStorage.setItem(`event-${eventId}`, JSON.stringify(response.data)); // Cache event in local storage
+      } catch (err) {
+        // If there is an error and we have cached data, use that instead
+        const cachedEvent = localStorage.getItem(`event-${eventId}`);
+        if (cachedEvent) {
+          setEvent(JSON.parse(cachedEvent));
+        } else {
+          setError(err as Error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [eventId]);
+
+  return { event, loading, error };
+};
+
 
 interface TrendingEventsProps {
   title: string;

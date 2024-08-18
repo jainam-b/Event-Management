@@ -125,7 +125,7 @@ eventRouter.get('/', async (c) => {
 });
 
 // API to get events by ID
-eventRouter.get('/events/:id', async (c) => {
+eventRouter.get('/:id', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -139,7 +139,7 @@ eventRouter.get('/events/:id', async (c) => {
 });
 
 // API to update event
-eventRouter.put('/events/:id', async (c) => {
+eventRouter.put('/:id', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());

@@ -11,6 +11,8 @@ const AuthStatus: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
+  console.log(loading,error);
+  
   useEffect(() => {
     if (!isAuthenticated) {
       const timer = setTimeout(() => {

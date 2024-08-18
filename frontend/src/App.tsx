@@ -10,6 +10,7 @@ import Event from "./pages/Event";
 import CreateEvent from "./pages/CreateEvent";
 import AllEvents from "./pages/AllEvents";
 import AuthStatus from "./components/AuthStatus";
+import BookTicket from "./components/BookTicket";
 
 const App: React.FC = () => {
   return (
@@ -24,6 +25,8 @@ const App: React.FC = () => {
             <Route path="/event/:id" element={<Event />} />
             <Route path="/create" element={<CreateEvent />} />
             <Route path="/events" element={<AllEvents />} />
+            <Route path="/buy-ticket/:eventId" element={<BookTicket />} />
+
           </Route>
 
           <Route path="/" element={<Home />} />

@@ -31,6 +31,7 @@ const EventPage: React.FC = () => {
   // Assuming events is an array and we're displaying the first event for simplicity
   const event = events[0];
 
+ 
   return (
     <div>
       <AppBar />
@@ -40,6 +41,7 @@ const EventPage: React.FC = () => {
         event.imageUrl ||
         "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZXZlbnR8ZW58MHx8MHx8fDA%3D"
       } 
+        eventId={event.id}
        name={event.name || 'No description available'}
        description={event.description || 'No description available'}
        startdate={event.startTime || 'No hours available'} /> 

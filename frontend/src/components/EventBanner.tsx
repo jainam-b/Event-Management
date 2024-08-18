@@ -1,15 +1,17 @@
-
+import { Navigate, useNavigate } from "react-router-dom";
 import backicon from "../assets/Vector (Stroke).png";
 import mappin from "../assets/MapPin.svg";
 
 interface EventBannerProps {
+  eventId:string,
   img: string;
   name: string;
   description: string;
   startdate: string;
 }
 
-const EventBanner: React.FC<EventBannerProps> = ({ img, name, description, startdate }) => {
+const EventBanner: React.FC<EventBannerProps> = ({eventId, img, name, description, startdate }) => {
+  const navigate=useNavigate();
   // Convert startdate to a readable format
   const formattedDate = new Date(startdate).toLocaleDateString('en-GB', {
     weekday: 'long',
@@ -17,7 +19,9 @@ const EventBanner: React.FC<EventBannerProps> = ({ img, name, description, start
     month: 'long',
     day: 'numeric',
   });
-
+  const handleEventClick = (eventId: string) => {
+    navigate(`/buy-ticket/${eventId}`);
+  };
   // Determine font size based on the length of the event name
   const nameLength = name.split(" ").length;
   const nameFontSize = nameLength > 6 ? "text-4xl" : nameLength > 3 ? "text-5xl" : "text-7xl";
@@ -56,7 +60,7 @@ const EventBanner: React.FC<EventBannerProps> = ({ img, name, description, start
         <a href="#" className="text-purple-500 underline mt-4 block">
           Add to calendar
         </a>
-        <button className="mt-4 bg-purple-500 text-white px-4 py-2 rounded-lg w-full">
+        <button onClick={()=>{handleEventClick(eventId)}} className="mt-4 bg-purple-500 text-white px-4 py-2 rounded-lg w-full">
           Book now
         </button>
         <button className="mt-2 bg-gray-300 text-black px-4 py-2 rounded-lg w-full">

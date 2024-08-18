@@ -17,7 +17,7 @@ const app = new Hono<{
 }>();
 
 // List of allowed origins
-const allowedOrigins = ['http://localhost:5173',"https://event-management-jade-ten.vercel.app"];
+const allowedOrigins = ['http://localhost:5173',"https://event-hive-jainam.vercel.app"];
 
 // CORS options
 const corsOptions = cors({
