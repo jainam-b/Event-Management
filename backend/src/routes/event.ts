@@ -134,6 +134,7 @@ eventRouter.get('/:id', async (c) => {
     where: {
       id: eventId,
     },
+    
   });
   return c.json(eventById);
 });
