@@ -7,11 +7,12 @@ interface EventCardProps {
   free?: boolean;
   title: string;
   date: string;
-  time: string;
   description?: string;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free, title, date, description }) => {
+const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free = false, title, date, description }) => {
+  console.log("====+++++++++++++++++++++++++++++++++",id);
+  
   return (
     <Link to={`/event/${id}`}>
       <div className="w-128 h-[22rem] bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5">

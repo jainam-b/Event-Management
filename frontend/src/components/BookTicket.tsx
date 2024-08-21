@@ -26,10 +26,11 @@ const BookTicket: React.FC = () => {
   return (
     <div>
       <AppBar />
-      <Heading eventTitle={event.name} />
+      {/* <Heading eventTitle={event.name} /> */}
       <EventDetailPage 
         eventID={event.id}
         eventName={event.name}
+        imageUrl={event.imageUrl}
         eventDescription={event.description || ""}
         eventLocation={event.location}
         eventDate={event.date}

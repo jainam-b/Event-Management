@@ -7,7 +7,8 @@ import Spinner from "./Spinner";
 const UpcommingEvents = () => {
   const { events, loading, error } = useEvents();
   const navigate=useNavigate();
-
+  console.log("))))))))))))))",events);
+  
   if (loading) {
     return (
       <div className="flex justify-center flex-col h-screen ">
@@ -40,7 +41,7 @@ const UpcommingEvents = () => {
             free={true} // Update this according to your event's data structure
             title={event.name}
             date={new Date(event.date).toLocaleDateString()}
-            time={new Date(event.startTime).toLocaleTimeString()}
+            // time={new Date(event.startTime).toLocaleTimeString()}
             description={event.description || "No description available"}
           />
         ))}
