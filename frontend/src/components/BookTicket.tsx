@@ -13,6 +13,8 @@ const BookTicket: React.FC = () => {
   }
 
   const { event, loading, error } = useEventById(eventId);
+  console.log(event);
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -30,7 +32,7 @@ const BookTicket: React.FC = () => {
       <EventDetailPage 
         eventID={event.id}
         eventName={event.name}
-        imageUrl={event.imageUrl}
+        imageUrl={event.imageUrl || ""}
         eventDescription={event.description || ""}
         eventLocation={event.location}
         eventDate={event.date}

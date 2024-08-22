@@ -1,7 +1,10 @@
-import { Hono } from 'hono';
-import { PrismaClient } from '@prisma/client/edge';
-import { withAccelerate } from '@prisma/extension-accelerate';
-import { createEventSchema, CreateEventSchemaType } from '@jainam-b/event-comman/dist';
+import { Hono } from "hono";
+import { PrismaClient } from "@prisma/client/edge";
+import { withAccelerate } from "@prisma/extension-accelerate";
+import {
+  createEventSchema,
+  CreateEventSchemaType,
+} from "@jainam-b/event-comman/dist";
 
 export const eventRouter = new Hono<{
   Bindings: {
@@ -14,7 +17,9 @@ export const eventRouter = new Hono<{
 }>();
 
 // Custom function to convert FormData to an object
-async function formDataToObject(formData: FormData): Promise<Record<string, any>> {
+async function formDataToObject(
+  formData: FormData,
+): Promise<Record<string, any>> {
   const obj: Record<string, any> = {};
   for (const [key, value] of (formData as any).entries()) {
     obj[key] = value;
@@ -22,7 +27,7 @@ async function formDataToObject(formData: FormData): Promise<Record<string, any>
   return obj;
 }
 
-// Define the expected Cloudinary response type
+// Define the expected Cloudinary res ponse type
 interface CloudinaryResponse {
   secure_url: string;
   error?: {
@@ -35,9 +40,6 @@ interface TicketType {
   totalQuantity: number;
   availableQuantity: number;
 }
-
-
- 
 
 // Route to create event
 // route to create event
@@ -114,9 +116,8 @@ eventRouter.post("/create", async (c) => {
   }
 });
 
-
 // API to get all events
-eventRouter.get('/', async (c) => {
+eventRouter.get("/", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -125,33 +126,32 @@ eventRouter.get('/', async (c) => {
 });
 
 // API to get events by ID
-eventRouter.get('/:id', async (c) => {
+eventRouter.get("/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
-  const eventId = c.req.param('id');
+  const eventId = c.req.param("id");
   const eventById = await prisma.event.findFirst({
     where: {
       id: eventId,
     },
-    
   });
   return c.json(eventById);
 });
 
 // API to update event
-eventRouter.put('/:id', async (c) => {
+eventRouter.put("/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
   const body = await c.req.json();
   const { success, error } = createEventSchema.safeParse(body);
-  const eventId = c.req.param('id');
+  const eventId = c.req.param("id");
 
   if (!success) {
     c.status(400); // Use 400 Bad Request for invalid inputs
     return c.json({
-      msg: 'Error Invalid inputs',
+      msg: "Error Invalid inputs",
       error: error.errors,
     });
   }
@@ -220,7 +220,7 @@ eventRouter.put('/:id', async (c) => {
           });
         } else {
           console.warn(
-            `TicketType with name ${ticketType.name} for event ID ${eventId} not found, skipping update.`
+            `TicketType with name ${ticketType.name} for event ID ${eventId} not found, skipping update.`,
           );
         }
       }
@@ -228,14 +228,14 @@ eventRouter.put('/:id', async (c) => {
 
     c.status(200);
     return c.json({
-      msg: 'Event updated successfully',
+      msg: "Event updated successfully",
       event: updateEvent,
     });
   } catch (error: any) {
     console.error(error);
     c.status(500); // Internal Server Error
     return c.json({
-      msg: 'An error occurred while updating the event',
+      msg: "An error occurred while updating the event",
       error: error.message,
     });
   } finally {
@@ -244,8 +244,8 @@ eventRouter.put('/:id', async (c) => {
 });
 
 // API to delete event
-eventRouter.delete('/events/:id', async (c) => {
-  const eventId = c.req.param('id');
+eventRouter.delete("/events/:id", async (c) => {
+  const eventId = c.req.param("id");
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -262,7 +262,7 @@ eventRouter.delete('/events/:id', async (c) => {
   } catch (error) {
     c.status(500);
     return c.json({
-      msg: 'Error occurred while deleting the event',
+      msg: "Error occurred while deleting the event",
     });
   } finally {
     await prisma.$disconnect();
@@ -275,12 +275,15 @@ export function convertAndValidateDate(dateString: string): {
   date?: Date;
   message?: string;
 } {
-  const [day, month, year] = dateString.split('/');
+  const [day, month, year] = dateString.split("/");
   const formattedDate = `${year}-${month}-${day}`;
   const date = new Date(formattedDate);
 
   if (isNaN(date.getTime())) {
-    return { valid: false, message: 'Invalid date format. Expected DD/MM/YYYY.' };
+    return {
+      valid: false,
+      message: "Invalid date format. Expected DD/MM/YYYY.",
+    };
   }
 
   return { valid: true, date };

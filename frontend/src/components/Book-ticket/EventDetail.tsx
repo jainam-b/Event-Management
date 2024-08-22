@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface TicketType {
   id: string;
@@ -6,6 +6,11 @@ interface TicketType {
   price: number;
   availableQuantity: number;
   totalQuantity: number;
+}
+
+interface SelectedTicket {
+  ticket: TicketType;
+  quantity: number;
 }
 
 interface EventDetailPageProps {
@@ -29,20 +34,50 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
   imageUrl,
   ticketTypes,
 }) => {
-  const [selectedTicket, setSelectedTicket] = useState<TicketType | null>(null);
+  const [selectedTickets, setSelectedTickets] = useState<SelectedTicket[]>([]);
+  const [currentQuantities, setCurrentQuantities] = useState<{ [id: string]: number }>({});
   const [bookingFee, setBookingFee] = useState(40);
 
-  // Determine if "Filling Fast" should be shown
   const isFillingFast = (availableQuantity: number, totalQuantity: number) =>
     availableQuantity < totalQuantity * 0.2;
 
-  const handleTicketSelection = (ticket: TicketType) => {
-    setSelectedTicket(ticket);
+  const handleTicketQuantityChange = (ticketId: string, newQuantity: number) => {
+    setCurrentQuantities((prevQuantities) => ({
+      ...prevQuantities,
+      [ticketId]: newQuantity,
+    }));
   };
 
-  const totalAmount = selectedTicket
-    ? selectedTicket.price + bookingFee
-    : 0;
+  const handleAddTicket = (ticket: TicketType) => {
+    const quantity = currentQuantities[ticket.id] || 0;
+    if (quantity > 0) {
+      setSelectedTickets((prevSelectedTickets) => {
+        const existingTicketIndex = prevSelectedTickets.findIndex(
+          (t) => t.ticket.id === ticket.id
+        );
+
+        if (existingTicketIndex >= 0) {
+          const updatedTickets = [...prevSelectedTickets];
+          updatedTickets[existingTicketIndex].quantity += quantity;
+          return updatedTickets;
+        } else {
+          return [...prevSelectedTickets, { ticket, quantity }];
+        }
+      });
+
+      // Reset the quantity after adding
+      setCurrentQuantities((prevQuantities) => ({
+        ...prevQuantities,
+        [ticket.id]: 0,
+      }));
+    }
+  };
+
+  const totalAmount = selectedTickets.reduce(
+    (total, selectedTicket) =>
+      total + selectedTicket.ticket.price * selectedTicket.quantity + bookingFee * selectedTicket.quantity,
+    0
+  );
 
   return (
     <div className="max-w-5xl mx-auto my-12 px-6 py-8">
@@ -71,27 +106,62 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
       </div>
 
       {/* Ticket Selection */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div
+        className={`grid gap-8 ${
+          ticketTypes.length === 1
+            ? "grid-cols-1"
+            : ticketTypes.length === 2
+            ? "grid-cols-2"
+            : "grid-cols-3"
+        }`}
+      >
         {ticketTypes.length > 0 ? (
           ticketTypes.map((ticket) => (
             <div
               key={ticket.id}
-              className={`relative bg-white border border-gray-300 rounded-lg p-5 shadow-sm transform transition-transform ${
-                selectedTicket?.id === ticket.id ? "scale-105 border-blue-500" : ""
-              }`}
-              onClick={() => handleTicketSelection(ticket)}
+              className={`relative bg-white border border-gray-300 rounded-lg p-5 shadow-sm`}
             >
               <h3 className="text-xl font-medium text-gray-700 mb-2">{ticket.name}</h3>
               <p className="text-2xl font-bold text-gray-900 mb-4">
-                ₹ {ticket.price.toFixed(2)}
+                ₹{ticket.price.toFixed(2)}
               </p>
               {isFillingFast(ticket.availableQuantity, ticket.totalQuantity) && (
                 <span className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                   Filling Fast
                 </span>
               )}
-              <button className="mt-auto w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors">
-                {selectedTicket?.id === ticket.id ? "Selected" : "Select"}
+              <div className="flex items-center mt-4">
+                <button
+                  className="bg-gray-200 px-3 py-1 rounded-l-md"
+                  onClick={() =>
+                    handleTicketQuantityChange(
+                      ticket.id,
+                      Math.max(0, (currentQuantities[ticket.id] || 0) - 1)
+                    )
+                  }
+                >
+                  -
+                </button>
+                <span className="px-4 py-1 text-center">
+                  {currentQuantities[ticket.id] || 0}
+                </span>
+                <button
+                  className="bg-gray-200 px-3 py-1 rounded-r-md"
+                  onClick={() =>
+                    handleTicketQuantityChange(
+                      ticket.id,
+                      Math.min(ticket.availableQuantity, (currentQuantities[ticket.id] || 0) + 1)
+                    )
+                  }
+                >
+                  +
+                </button>
+              </div>
+              <button
+                className="mt-4 w-full bg-[#7848F4] text-white py-2 rounded-md bg-[#7848F4] transition-colors"
+                onClick={() => handleAddTicket(ticket)}
+              >
+                Add
               </button>
             </div>
           ))
@@ -103,24 +173,37 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
       </div>
 
       {/* Ticket Summary */}
-      {selectedTicket && (
+      {selectedTickets.length > 0 && (
         <div className="mt-12 p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-md">
           <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            Selected Ticket: {selectedTicket.name}
+            Selected Tickets:
           </h3>
           <div className="text-gray-700 space-y-3">
+            {selectedTickets.map((selectedTicket) => (
+              <div key={selectedTicket.ticket.id}>
+                <p className="text-lg">
+                  <span className="font-semibold">{selectedTicket.ticket.name}:</span> ₹
+                  {(selectedTicket.ticket.price * selectedTicket.quantity).toFixed(2)} (x
+                  {selectedTicket.quantity})
+                </p>
+              </div>
+            ))}
             <p className="text-lg">
-              <span className="font-semibold">Price:</span> ₹ {selectedTicket.price.toFixed(2)}
-            </p>
-            <p className="text-lg">
-              <span className="font-semibold">Booking Fee:</span> ₹ {bookingFee.toFixed(2)}
+              <span className="font-semibold">Booking Fee:</span> ₹
+              {(
+                selectedTickets.reduce(
+                  (total, selectedTicket) =>
+                    total + bookingFee * selectedTicket.quantity,
+                  0
+                )
+              ).toFixed(2)}
             </p>
             <p className="text-xl font-semibold text-gray-900 mt-4">
-              Total Amount: ₹ {totalAmount.toFixed(2)}
+              Total Amount: ₹{totalAmount.toFixed(2)}
             </p>
           </div>
-          <button className="mt-6 w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition-colors">
-            Proceed to Pay ₹ {totalAmount.toFixed(2)}
+          <button className="mt-6 w-full bg-[#7848F4] text-white py-3 rounded-md hover:bg-green-700 transition-colors">
+            Proceed to Pay ₹{totalAmount.toFixed(2)}
           </button>
         </div>
       )}

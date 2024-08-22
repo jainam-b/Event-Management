@@ -31,11 +31,10 @@ ticketRouter.post("/create", authMiddleware, async (c) => {
       errors: validation.error.errors,
     });
   }
-  const userId = c.user?.id;
-  const { eventId, ticketTypesId, quantity } = body;
+
+  const { eventId, ticketTypesId, quantity, userId } = body;
 
   try {
-    // Find the ticket type first to ensure it's available
     const ticketType = await prisma.ticketType.findUnique({
       where: { id: ticketTypesId },
     });
@@ -50,69 +49,50 @@ ticketRouter.post("/create", authMiddleware, async (c) => {
       return c.json({ msg: "Not enough tickets available" });
     }
 
-    let ticketId: string;
-
-    // Find existing tickets for this user, event, and ticket type
-    const existingTicket = await prisma.ticket.findFirst({
+    // Find available seats
+    const availableSeats = await prisma.seatMap.findMany({
       where: {
-        userId,
         eventId,
-        ticketTypesId,
-        status: "ACTIVE",
+        isReserved: false,
       },
+      take: quantity,
     });
 
-    if (existingTicket) {
-      // Update the existing ticket quantity
-      const updatedTicket = await prisma.ticket.update({
-        where: {
-          id: existingTicket.id,
-        },
-        data: {
-          quantity: existingTicket.quantity + quantity, // Increment the quantity
-          purchasedDate: new Date(), // Update the purchased date
-        },
-      });
-      ticketId = updatedTicket.id;
-    } else {
-      // Create new tickets if none exist
-      const newTicket = await prisma.ticket.create({
-        data: {
-          userId:userId,
-          eventId,
-          ticketTypesId,
-          quantity, // Set the quantity
-          status: "ACTIVE",
-          purchasedDate: new Date(), // Set purchased date
-          
-           
-        },
-      });
-      ticketId = newTicket.id;
+    if (availableSeats.length < quantity) {
+      c.status(400);
+      return c.json({ msg: "Not enough seats available" });
     }
 
-    // Update the available quantity in the TicketType table
-    await prisma.ticketType.update({
-      where: { id: ticketTypesId },
-      data: {
-        availableQuantity: ticketType.availableQuantity - quantity,
-      },
+    // Assign seats to the user
+    const seatUpdates = availableSeats.map((seat) => {
+      return prisma.seatMap.update({
+        where: { id: seat.id },
+        data: {
+          isReserved: true,
+          userId,
+        },
+      });
     });
 
-    // Create a transaction record
-    await prisma.transaction.create({
-      data: {
-        userId:userId,
-        eventId,
-        ticketTypesId, // Include the ticketTypesId
-        totalAmount: ticketType.price * quantity,  
-        paymentMethod: "credit card",  
-        paymentStatus: "completed",
-        
-      },
+    // Create tickets with assigned seats
+    const ticketCreation = availableSeats.map((seat) => ({
+      userId,
+      eventId,
+      ticketTypesId,
+      seatId: seat.id,
+      status: "ACTIVE",
+      purchasedDate: new Date(),
+    }));
+
+    await Promise.all(seatUpdates);
+    await prisma.ticket.createMany({
+      data: ticketCreation,
     });
 
-    return c.json({ msg: "Tickets processed successfully!" });
+    // Collect seat numbers for response
+    const seatNumbers = availableSeats.map(seat => seat.seatNumber);
+
+    return c.json({ msg: "Tickets processed successfully!", seatNumbers });
   } catch (error) {
     console.error("Error during ticket purchase:", error);
     c.status(500);
@@ -121,6 +101,8 @@ ticketRouter.post("/create", authMiddleware, async (c) => {
     });
   }
 });
+
+
 
 
 
