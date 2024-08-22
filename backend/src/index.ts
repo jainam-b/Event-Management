@@ -6,6 +6,7 @@ import { ticketTypeRouter } from './routes/ticketType';
 import { ticketRouter } from './routes/ticket';
 import { transactionRouter } from './routes/transaction';
 import { seatMapRouter } from './routes/seatmap';
+import { phaseRouter, phaseTicketRouter } from './routes/phaseTicket';
  
 
 // Define the Hono app with bindings
@@ -42,6 +43,7 @@ app.route('/api/v1/ticket-types', ticketTypeRouter);
 app.route('/api/v1/tickets', ticketRouter);
 app.route('/api/v1/transactions', transactionRouter);
 app.route('/api/v1/seat-maps', seatMapRouter);
+app.route('/api/v1/phase', phaseRouter);
  
 
 export default app;

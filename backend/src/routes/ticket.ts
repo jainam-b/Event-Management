@@ -3,7 +3,7 @@ import { Prisma, PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { ticket } from "@jainam-b/event-comman/dist";
 import { authMiddleware } from "../middleware/authMiddleware";
-
+import { z } from "zod";
 export const ticketRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
@@ -15,32 +15,49 @@ export const ticketRouter = new Hono<{
 
 
 
-// route to purchase a ticket
- 
-ticketRouter.post("/create", authMiddleware, async (c) => {
-  const body = await c.req.json();
+const ticketSchema = z.object({
+  userId: z.string().uuid("Invalid user ID format").optional(),
+  ticketTypesId: z.string().uuid("Invalid ticket type ID format"),
+  quantity: z.number().int().positive(),
+});
+
+ticketRouter.post("/events/:eventId/tickets/assign", authMiddleware, async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
-  const validation = ticket.safeParse(body);
+
+  const eventId = c.req.param("eventId");
+  const body = await c.req.json();
+  const validation = ticketSchema.safeParse(body);
 
   if (!validation.success) {
-    c.status(411);
+    c.status(400);
     return c.json({
       msg: "Incorrect Inputs",
       errors: validation.error.errors,
     });
   }
 
-  const { eventId, ticketTypesId, quantity, userId } = body;
+  const { ticketTypesId, quantity, userId } = body;
 
   try {
+    // Check if the event exists
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      c.status(404);
+      return c.json({ msg: "Event not found" });
+    }
+
+    // Check if the ticket type exists and is available
     const ticketType = await prisma.ticketType.findUnique({
       where: { id: ticketTypesId },
     });
 
     if (!ticketType) {
-      c.status(400);
+      c.status(404);
       return c.json({ msg: "Ticket type not found" });
     }
 
@@ -57,6 +74,9 @@ ticketRouter.post("/create", authMiddleware, async (c) => {
       },
       take: quantity,
     });
+
+    // Debug: Log available seats
+    console.log("Available seats:", availableSeats);
 
     if (availableSeats.length < quantity) {
       c.status(400);
@@ -84,6 +104,10 @@ ticketRouter.post("/create", authMiddleware, async (c) => {
       purchasedDate: new Date(),
     }));
 
+    // Debug: Log seat updates and ticket creation
+    console.log("Seat updates:", seatUpdates);
+    console.log("Ticket creation:", ticketCreation);
+
     await Promise.all(seatUpdates);
     await prisma.ticket.createMany({
       data: ticketCreation,
@@ -92,13 +116,18 @@ ticketRouter.post("/create", authMiddleware, async (c) => {
     // Collect seat numbers for response
     const seatNumbers = availableSeats.map(seat => seat.seatNumber);
 
+    // Debug: Log seat numbers
+    console.log("Seat numbers:", seatNumbers);
+
     return c.json({ msg: "Tickets processed successfully!", seatNumbers });
   } catch (error) {
-    console.error("Error during ticket purchase:", error);
+    console.error("Error during ticket processing:", error);
     c.status(500);
     return c.json({
       msg: "An error occurred while processing the tickets",
     });
+  } finally {
+    await prisma.$disconnect();
   }
 });
 

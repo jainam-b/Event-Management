@@ -104,8 +104,8 @@ seatMapRouter.post("/events/:eventId/tickets/assign", authMiddleware, async (c) 
     });
   }
 
-  const userId = c.user?.id || body.userId;
-  const { ticketTypesId, quantity } = body;
+  // const userId = c.user?.id || body.userId;
+  const { ticketTypesId, quantity ,userId} = body;
 
   try {
     // Check if the event exists
