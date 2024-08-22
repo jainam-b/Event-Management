@@ -6,7 +6,7 @@ import EventDescription from './EventDescription';
 import EventLocation from './EventLocation';
 import Footer from './Footer';
 import TrendingEvents from './TrendingEvents';
-import useEvents, { useEventById } from '../hooks/event';
+import { useEventById } from '../hooks/event';
 import Spinner from './Spinner';
 
 const EventPage: React.FC = () => {

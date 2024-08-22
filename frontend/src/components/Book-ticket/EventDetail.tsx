@@ -1,12 +1,13 @@
 import { useState } from "react";
 
-interface TicketType {
+export interface TicketType {
   id: string;
   name: string;
   price: number;
-  availableQuantity: number;
   totalQuantity: number;
+  availableQuantity: number;
 }
+
 
 interface SelectedTicket {
   ticket: TicketType;
@@ -14,6 +15,7 @@ interface SelectedTicket {
 }
 
 interface EventDetailPageProps {
+  id:string,
   eventName: string;
   eventDescription: string;
   eventLocation: string;
@@ -25,6 +27,7 @@ interface EventDetailPageProps {
 }
 
 const EventDetailPage: React.FC<EventDetailPageProps> = ({
+ 
   eventName,
   eventDescription,
   eventLocation,
@@ -37,7 +40,7 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
   const [selectedTickets, setSelectedTickets] = useState<SelectedTicket[]>([]);
   const [currentQuantities, setCurrentQuantities] = useState<{ [id: string]: number }>({});
   const [bookingFee, setBookingFee] = useState(40);
-
+  console.log(setBookingFee)
   const isFillingFast = (availableQuantity: number, totalQuantity: number) =>
     availableQuantity < totalQuantity * 0.2;
 

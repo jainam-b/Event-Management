@@ -48,7 +48,7 @@ const AllEvents = () => {
             free={true} // Update this according to your event's data structure
             title={event.name}
             date={new Date(event.date).toLocaleDateString()}
-            time={new Date(event.startTime).toLocaleTimeString()}
+            // time={new Date(event.startTime).toLocaleTimeString()}
             description={event.description || "No description available"}
           />
         ))}

@@ -1,6 +1,5 @@
 import React from "react";
 import AppBar from "./AppBar";
-import Heading from "../components/Book-ticket/Heading";
 import { useParams } from "react-router-dom";
 import Spinner from "./Spinner";
 import { useEventById } from "../hooks/event";
@@ -24,13 +23,15 @@ const BookTicket: React.FC = () => {
   }
   if (error) return <div>Error: {error.message}</div>;
   if (!event) return <div>No event found</div>;
+  
 
   return (
     <div>
       <AppBar />
       {/* <Heading eventTitle={event.name} /> */}
+      
       <EventDetailPage 
-        eventID={event.id}
+        id={event.id}
         eventName={event.name}
         imageUrl={event.imageUrl || ""}
         eventDescription={event.description || ""}
@@ -38,10 +39,15 @@ const BookTicket: React.FC = () => {
         eventDate={event.date}
         startTime={event.startTime}
         endTime={event.endTime}
-        ticketTypes={event.ticketTypes} 
+        ticketTypes={event.ticketTypes.map((ticket, index) => ({
+          ...ticket,
+          id: `ticket-${index}`
+        }))} 
       />
     </div>
   );
 };
 
 export default BookTicket;
+
+

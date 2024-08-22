@@ -121,7 +121,10 @@ eventRouter.get("/", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
-  const allEvents = await prisma.event.findMany({});
+  const allEvents = await prisma.event.findMany({
+    include: {
+      ticketTypes: true,  // Include the related ticketTypes array
+    },});
   return c.json(allEvents);
 });
 
@@ -130,14 +133,21 @@ eventRouter.get("/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
+
   const eventId = c.req.param("id");
+
   const eventById = await prisma.event.findFirst({
     where: {
       id: eventId,
     },
+    include: {
+      ticketTypes: true,  // Include the related ticketTypes array
+    },
   });
+
   return c.json(eventById);
 });
+
 
 // API to update event
 eventRouter.put("/:id", async (c) => {

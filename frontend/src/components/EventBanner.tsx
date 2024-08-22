@@ -1,4 +1,4 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import backicon from "../assets/Vector (Stroke).png";
 import mappin from "../assets/MapPin.svg";
 
