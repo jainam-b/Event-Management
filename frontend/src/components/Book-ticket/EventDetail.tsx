@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios"; // Ensure axios is installed
+import { BACKEND_URL } from "../../config";
+import { getCookie } from "../../utils/cookies";
 
 export interface TicketType {
   id: string;
@@ -8,14 +11,14 @@ export interface TicketType {
   availableQuantity: number;
 }
 
-
 interface SelectedTicket {
-  ticket: TicketType;
+  ticketTypeId: string;
+  userId: string;
   quantity: number;
 }
 
 interface EventDetailPageProps {
-  id:string,
+  id: string;
   eventName: string;
   eventDescription: string;
   eventLocation: string;
@@ -27,7 +30,7 @@ interface EventDetailPageProps {
 }
 
 const EventDetailPage: React.FC<EventDetailPageProps> = ({
- 
+  id,
   eventName,
   eventDescription,
   eventLocation,
@@ -39,8 +42,26 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
 }) => {
   const [selectedTickets, setSelectedTickets] = useState<SelectedTicket[]>([]);
   const [currentQuantities, setCurrentQuantities] = useState<{ [id: string]: number }>({});
-  const [bookingFee, setBookingFee] = useState(40);
-  console.log(setBookingFee)
+  const [bookingFee] = useState(40); // Fixed booking fee
+
+  // Initialize userId state
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Retrieve user ID from localStorage
+    const userDataString = localStorage.getItem("userData");
+    if (userDataString) {
+      try {
+        const userData = JSON.parse(userDataString);
+        setUserId(userData.id);
+      } catch (error) {
+        console.error("Failed to parse user data:", error);
+      }
+    } else {
+      console.log("User data not found");
+    }
+  }, []);
+
   const isFillingFast = (availableQuantity: number, totalQuantity: number) =>
     availableQuantity < totalQuantity * 0.2;
 
@@ -53,10 +74,11 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
 
   const handleAddTicket = (ticket: TicketType) => {
     const quantity = currentQuantities[ticket.id] || 0;
-    if (quantity > 0) {
+
+    if (quantity > 0 && userId) {
       setSelectedTickets((prevSelectedTickets) => {
         const existingTicketIndex = prevSelectedTickets.findIndex(
-          (t) => t.ticket.id === ticket.id
+          (t) => t.ticketTypeId === ticket.id
         );
 
         if (existingTicketIndex >= 0) {
@@ -64,11 +86,13 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
           updatedTickets[existingTicketIndex].quantity += quantity;
           return updatedTickets;
         } else {
-          return [...prevSelectedTickets, { ticket, quantity }];
+          return [
+            ...prevSelectedTickets,
+            { userId, ticketTypeId: ticket.id, quantity },
+          ];
         }
       });
 
-      // Reset the quantity after adding
       setCurrentQuantities((prevQuantities) => ({
         ...prevQuantities,
         [ticket.id]: 0,
@@ -78,9 +102,38 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
 
   const totalAmount = selectedTickets.reduce(
     (total, selectedTicket) =>
-      total + selectedTicket.ticket.price * selectedTicket.quantity + bookingFee * selectedTicket.quantity,
+      total +
+      (ticketTypes.find((ticket) => ticket.id === selectedTicket.ticketTypeId)?.price || 0) *
+        selectedTicket.quantity +
+      bookingFee * selectedTicket.quantity,
     0
   );
+  const token=getCookie("token");
+  const handleTicket = async () => {
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL}/api/v1/phase/events/${id}/tickets/assign-phase`,
+        selectedTickets,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `${token}`, 
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("Tickets assigned successfully:", response.data);
+        // Handle success (e.g., show a success message or redirect)
+      } else {
+        console.error("Failed to assign tickets:", response.data);
+        // Handle errors (e.g., show an error message)
+      }
+    } catch (error) {
+      console.error("An error occurred during ticket assignment:", error);
+      // Handle errors (e.g., show an error message)
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto my-12 px-6 py-8">
@@ -122,7 +175,7 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
           ticketTypes.map((ticket) => (
             <div
               key={ticket.id}
-              className={`relative bg-white border border-gray-300 rounded-lg p-5 shadow-sm`}
+              className="relative bg-white border border-gray-300 rounded-lg p-5 shadow-sm"
             >
               <h3 className="text-xl font-medium text-gray-700 mb-2">{ticket.name}</h3>
               <p className="text-2xl font-bold text-gray-900 mb-4">
@@ -161,7 +214,7 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
                 </button>
               </div>
               <button
-                className="mt-4 w-full bg-[#7848F4] text-white py-2 rounded-md bg-[#7848F4] transition-colors"
+                className="mt-4 w-full bg-[#7848F4] text-white py-2 rounded-md transition-colors"
                 onClick={() => handleAddTicket(ticket)}
               >
                 Add
@@ -183,31 +236,31 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
           </h3>
           <div className="text-gray-700 space-y-3">
             {selectedTickets.map((selectedTicket) => (
-              <div key={selectedTicket.ticket.id}>
+              <div key={selectedTicket.ticketTypeId}>
                 <p className="text-lg">
-                  <span className="font-semibold">{selectedTicket.ticket.name}:</span> ₹
-                  {(selectedTicket.ticket.price * selectedTicket.quantity).toFixed(2)} (x
-                  {selectedTicket.quantity})
+                  <span className="font-semibold">
+                    {
+                      ticketTypes.find((ticket) => ticket.id === selectedTicket.ticketTypeId)?.name
+                    }:
+                  </span> ₹
+                  {(ticketTypes.find((ticket) => ticket.id === selectedTicket.ticketTypeId)?.price || 0) *
+                    selectedTicket.quantity +
+                    bookingFee * selectedTicket.quantity}
                 </p>
               </div>
             ))}
-            <p className="text-lg">
-              <span className="font-semibold">Booking Fee:</span> ₹
-              {(
-                selectedTickets.reduce(
-                  (total, selectedTicket) =>
-                    total + bookingFee * selectedTicket.quantity,
-                  0
-                )
-              ).toFixed(2)}
-            </p>
-            <p className="text-xl font-semibold text-gray-900 mt-4">
+          </div>
+          <div className="mt-4 border-t border-gray-300 pt-4">
+            <p className="text-lg font-semibold text-gray-800">
               Total Amount: ₹{totalAmount.toFixed(2)}
             </p>
+            <button
+              className="mt-4 w-full bg-green-500 text-white py-2 rounded-md transition-colors"
+              onClick={handleTicket}
+            >
+              Book Tickets
+            </button>
           </div>
-          <button className="mt-6 w-full bg-[#7848F4] text-white py-3 rounded-md hover:bg-green-700 transition-colors">
-            Proceed to Pay ₹{totalAmount.toFixed(2)}
-          </button>
         </div>
       )}
     </div>

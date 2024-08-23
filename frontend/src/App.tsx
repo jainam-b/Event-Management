@@ -22,10 +22,10 @@ const App: React.FC = () => {
           <Route path="/auth" element={<AuthStatus />} />
           
           <Route element={<ProtectedRoute />}>
+            <Route path="/buy-ticket/:eventId" element={<BookTicket />} />
             <Route path="/event/:eventId" element={<Event />} />
             <Route path="/create" element={<CreateEvent />} />
             <Route path="/events" element={<AllEvents />} />
-            <Route path="/buy-ticket/:eventId" element={<BookTicket />} />
 
           </Route>
 

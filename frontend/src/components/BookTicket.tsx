@@ -5,14 +5,22 @@ import Spinner from "./Spinner";
 import { useEventById } from "../hooks/event";
 import EventDetailPage from "./Book-ticket/EventDetail";
 
+interface TicketType {
+  name: string;
+  price: number;
+  totalQuantity: number;
+  availableQuantity: number;
+  id?: string; // Marked as optional
+}
+
 const BookTicket: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
+  
   if (!eventId) {
     return <div>Error: Event ID is missing</div>;
   }
 
   const { event, loading, error } = useEventById(eventId);
-  console.log(event);
   
   if (loading) {
     return (
@@ -21,15 +29,16 @@ const BookTicket: React.FC = () => {
       </div>
     );
   }
+
   if (error) return <div>Error: {error.message}</div>;
+
   if (!event) return <div>No event found</div>;
-  
+
+  console.log("++++++++++", event);
 
   return (
     <div>
       <AppBar />
-      {/* <Heading eventTitle={event.name} /> */}
-      
       <EventDetailPage 
         id={event.id}
         eventName={event.name}
@@ -39,15 +48,13 @@ const BookTicket: React.FC = () => {
         eventDate={event.date}
         startTime={event.startTime}
         endTime={event.endTime}
-        ticketTypes={event.ticketTypes.map((ticket, index) => ({
+        ticketTypes={event.ticketTypes.map((ticket: TicketType, index) => ({
           ...ticket,
-          id: `ticket-${index}`
-        }))} 
+          id: ticket.id || `ticket-${index}` // Generate a fallback id if not present
+        }))}
       />
     </div>
   );
 };
 
 export default BookTicket;
-
-
