@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios"; // Ensure axios is installed
+import axios from "axios";
 import { BACKEND_URL } from "../../config";
-import { getCookie } from "../../utils/cookies";
-
+import Spinner from "../Spinner";
+import { useNavigate } from "react-router-dom";
 export interface TicketType {
   id: string;
   name: string;
@@ -40,15 +40,15 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
   imageUrl,
   ticketTypes,
 }) => {
+  const navigate=useNavigate();
   const [selectedTickets, setSelectedTickets] = useState<SelectedTicket[]>([]);
   const [currentQuantities, setCurrentQuantities] = useState<{ [id: string]: number }>({});
   const [bookingFee] = useState(40); // Fixed booking fee
 
-  // Initialize userId state
   const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false); // Loading state
 
   useEffect(() => {
-    // Retrieve user ID from localStorage
     const userDataString = localStorage.getItem("userData");
     if (userDataString) {
       try {
@@ -108,23 +108,25 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
       bookingFee * selectedTicket.quantity,
     0
   );
-  const token=getCookie("token");
+
   const handleTicket = async () => {
+    setLoading(true); // Start loading
     try {
+      console.log("Sending request with selected tickets:", selectedTickets);
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/phase/events/${id}/tickets/assign-phase`,
         selectedTickets,
         {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `${token}`, 
           },
         }
       );
 
       if (response.status === 200) {
         console.log("Tickets assigned successfully:", response.data);
-        // Handle success (e.g., show a success message or redirect)
+        const ticketsParam = encodeURIComponent(JSON.stringify(response.data));
+      navigate(`/ticket?tickets=${ticketsParam}`);
       } else {
         console.error("Failed to assign tickets:", response.data);
         // Handle errors (e.g., show an error message)
@@ -132,11 +134,14 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
     } catch (error) {
       console.error("An error occurred during ticket assignment:", error);
       // Handle errors (e.g., show an error message)
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto my-12 px-6 py-8">
+      {loading && <Spinner />} 
       {/* Event Banner */}
       <div className="relative mb-12 rounded-lg overflow-hidden shadow-lg">
         <img
@@ -230,37 +235,36 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
 
       {/* Ticket Summary */}
       {selectedTickets.length > 0 && (
-        <div className="mt-12 p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-md">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            Selected Tickets:
-          </h3>
-          <div className="text-gray-700 space-y-3">
-            {selectedTickets.map((selectedTicket) => (
-              <div key={selectedTicket.ticketTypeId}>
-                <p className="text-lg">
-                  <span className="font-semibold">
-                    {
-                      ticketTypes.find((ticket) => ticket.id === selectedTicket.ticketTypeId)?.name
-                    }:
-                  </span> ₹
-                  {(ticketTypes.find((ticket) => ticket.id === selectedTicket.ticketTypeId)?.price || 0) *
-                    selectedTicket.quantity +
-                    bookingFee * selectedTicket.quantity}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 border-t border-gray-300 pt-4">
-            <p className="text-lg font-semibold text-gray-800">
-              Total Amount: ₹{totalAmount.toFixed(2)}
-            </p>
-            <button
-              className="mt-4 w-full bg-green-500 text-white py-2 rounded-md transition-colors"
-              onClick={handleTicket}
-            >
-              Book Tickets
-            </button>
-          </div>
+        <div className="mt-12 bg-gray-100 p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-semibold mb-4">Selected Tickets</h2>
+          <ul className="space-y-4">
+            {selectedTickets.map((ticket) => {
+              const ticketDetails = ticketTypes.find(
+                (t) => t.id === ticket.ticketTypeId
+              );
+              return ticketDetails ? (
+                <li key={ticket.ticketTypeId} className="flex justify-between">
+                  <span>{ticketDetails.name}</span>
+                  <span>
+                    ₹{ticketDetails.price.toFixed(2)} x {ticket.quantity}
+                  </span>
+                </li>
+              ) : null;
+            })}
+            <li className="flex justify-between font-semibold">
+              <span>Total Amount</span>
+              <span>₹{totalAmount.toFixed(2)}</span>
+            </li>
+          </ul>
+           <div>
+           {loading && <Spinner />}
+          <button
+            className="mt-6 w-full bg-[#7848F4] text-white py-2 rounded-md transition-colors"
+            onClick={handleTicket}
+          >
+            Confirm Booking
+          </button>
+          </div> 
         </div>
       )}
     </div>

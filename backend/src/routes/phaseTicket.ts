@@ -41,6 +41,7 @@ phaseRouter.post("/events/:eventId/tickets/assign-phase", async (c) => {
 
   // Destructure the array of assignments
   const assignments = body;
+  const createdTickets = []; // Array to hold created ticket details
 
   try {
     // Check if the event exists
@@ -87,12 +88,21 @@ phaseRouter.post("/events/:eventId/tickets/assign-phase", async (c) => {
         },
       });
 
-      await prisma.ticket.createMany({
+      // Insert tickets and collect the results
+      const created = await prisma.ticket.createMany({
         data: ticketCreation,
+        skipDuplicates: true, 
+      });
+
+      // Collect ticket IDs and quantities
+      createdTickets.push({
+        ticketTypeId,
+        quantity,
+        ticketIds: created.ids, 
       });
     }
 
-    return c.json({ msg: "Tickets processed successfully!" });
+    return c.json({ msg: "Tickets processed successfully!", tickets: createdTickets });
   } catch (error) {
     console.error("Error during phase assignment:", error);
     c.status(500);
