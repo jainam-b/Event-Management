@@ -76,7 +76,28 @@ ticketTypeRouter.get("/:eventId/ticket-types", async (c) => {
     });
   }
 });
+ticketTypeRouter.get("/:ticketTypesId", async (c) => {
+  const ticketTypesId = c.req.param("ticketTypesId");
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
 
+  try {
+    const getTicketType = await prisma.ticketType.findMany({
+      where: {
+        id: ticketTypesId,
+      },
+    });
+    return c.json({
+      getTicketType,
+    });
+  } catch (error) {
+    c.status(404);
+    return c.json({
+      msg: "Invalid event ID ",
+    });
+  }
+});
 //   Update a specific ticket type
 
 ticketTypeRouter.put("/ticket-types/:ticketTypeId", async (c) => {

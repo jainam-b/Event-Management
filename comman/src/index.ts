@@ -54,6 +54,7 @@ const dateSchema = z
 
 
 export const ticketType = z.object({
+  id:z.string().uuid("Invalid  ID format"),
   name: z.string().min(1, "Ticket type name is required"),
   price: z.number().nonnegative().min(0, "Price must be a non-negative number"),
   totalQuantity: z

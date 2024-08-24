@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BACKEND_URL } from '../config';
-import { TicketType } from '@jainam-b/event-comman/dist';
+import { ticketType, TicketType } from '@jainam-b/event-comman/dist';
 
 interface Event {
   ticketTypes: TicketType[];
@@ -18,6 +18,7 @@ interface Event {
   createdAt: string;
   updatedAt: string;
 }
+
 
 const useEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -81,9 +82,40 @@ export const useEventById = (eventId: string) => {
     fetchEvent();
   }, [eventId]);
 
+ 
+
   return { event, loading, error };
 };
+export const useTicketTypebyId = (ticketTypeId: string) => {
+  const [ticketType, setTicketType] = useState<TicketType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const response = await axios.get<TicketType>(
+          `${BACKEND_URL}/api/v1/ticket-types/${ticketTypeId}`
+        );
+        setTicketType(response.data);
+        localStorage.setItem(`ticketType-${ticketTypeId}`, JSON.stringify(response.data));
+      } catch (error) {
+        const cachedEvent = localStorage.getItem(`ticketType-${ticketTypeId}`);
+        if (cachedEvent) {
+          setTicketType(JSON.parse(cachedEvent));
+        } else {
+          setError(error as Error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [ticketTypeId]);
+
+  return { ticketType, loading, error };
+};
 
 interface TrendingEventsProps {
   title: string;
