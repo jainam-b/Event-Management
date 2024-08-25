@@ -26,7 +26,11 @@ const Ticket = () => {
       }
     }
   }, [ticketsParam]);
+ console.log(tickets);
+localStorage.setItem("Tickets",JSON.stringify(tickets))
 
+ 
+  
   useEffect(() => {
     const fetchTicketDetails = async () => {
       setLoading(true);
@@ -36,7 +40,7 @@ const Ticket = () => {
         );
         const responses = await Promise.all(ticketTypePromises);
         const newTicketDetails = responses.reduce((acc, response) => {
-          const ticketTypes = response.data.getTicketType; // Adjust to access `getTicketType`
+          const ticketTypes = response.data.getTicketType;
           ticketTypes.forEach(ticketType => {
             acc[ticketType.id] = ticketType;
           });
@@ -44,7 +48,6 @@ const Ticket = () => {
         }, {} as { [key: string]: TicketType });
         setTicketDetails(newTicketDetails);
 
-        // Cache the data in local storage
         tickets.forEach(ticket => {
           const ticketType = newTicketDetails[ticket.ticketTypeId];
           if (ticketType) {
@@ -52,7 +55,6 @@ const Ticket = () => {
           }
         });
       } catch (error) {
-        // Handle API failure and use cached data
         const cachedTickets = tickets.reduce((acc, ticket) => {
           const cached = localStorage.getItem(`ticketType-${ticket.ticketTypeId}`);
           if (cached) {
@@ -76,28 +78,34 @@ const Ticket = () => {
   }, [tickets]);
 
   return (
-    <div className="max-w-5xl mx-auto my-12 px-6 py-8">
-      <h2 className="text-2xl font-semibold mb-4">Ticket Details</h2>
+    <div className="max-w-6xl mx-auto my-12 px-6 py-8 bg-white shadow-lg rounded-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Your Tickets</h2>
       {loading ? (
-        <p>Loading...</p>
+        <div className="flex justify-center items-center h-48">
+          <div className="animate-spin h-10 w-10 border-4 border-t-4 border-blue-600 border-solid rounded-full"></div>
+        </div>
       ) : error ? (
-        <p className="text-red-500">Error loading ticket details: {error.message}</p>
+        <p className="text-red-600 text-center">Error loading ticket details: {error.message}</p>
       ) : tickets.length > 0 ? (
         <ul className="space-y-4">
           {tickets.map((ticket, index) => {
             const ticketType = ticketDetails[ticket.ticketTypeId];
             return (
-              <li key={index} className="flex justify-between">
-                {/* <span>Ticket ID: {ticket.ticketTypeId}</span> */}
-                <span>Type Name: {ticketType ? ticketType.name : "Loading..."}</span>
-                <span>Quantity: {ticket.quantity}</span>
-                <span>Price: {ticketType ? `$${ticketType.price}` : "Loading..."}</span>
+              <li key={index} className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50 rounded-lg">
+                <div className="flex-1">
+                  <p className="text-lg font-semibold text-gray-700">Type Name: {ticketType ? ticketType.name : "Loading..."}</p>
+                  <p className="text-sm text-gray-500">Ticket ID: {ticket.ticketTypeId}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-medium text-gray-900">Quantity: {ticket.quantity}</p>
+                  <p className="text-md font-medium text-green-600">Price: {ticketType ? `$${ticketType.price}` : "Loading..."}</p>
+                </div>
               </li>
             );
           })}
         </ul>
       ) : (
-        <p className="text-lg text-gray-500">No tickets found</p>
+        <p className="text-lg text-gray-500 text-center">No tickets found</p>
       )}
     </div>
   );

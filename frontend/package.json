@@ -12,6 +12,8 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@jainam-b/event-comman": "^14.0.0",
+    "@stripe/react-stripe-js": "^2.8.0",
+    "@stripe/stripe-js": "^4.3.0",
     "@types/js-cookie": "^3.0.6",
     "axios": "^1.7.2",
     "js-cookie": "^3.0.5",
@@ -20,7 +22,9 @@
     "react-datepicker": "^7.3.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.25.1",
-    "react-toastify": "^10.0.5"
+    "react-toastify": "^10.0.5",
+    "s": "^1.0.0",
+    "stripe": "^16.8.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
