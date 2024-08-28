@@ -1,12 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getCookie } from '../utils/cookies'; // Update path if necessary
-import {jwtDecode} from 'jwt-decode'; // Correct import for jwt-decode
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { getCookie } from "../utils/cookies"; // Import your getCookie function
+import {jwtDecode} from "jwt-decode"; // Correct import for jwt-decode
 
 interface User {
   id: string;
   email: string;
   role: string;
-   
 }
 
 interface AuthContextType {
@@ -24,23 +23,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState<boolean>(true); // Add a loading state
 
   useEffect(() => {
-    const token = getCookie('token');
-    console.log('Token:', token); // Debugging line
+    const token = getCookie("token");
+    console.log("Token:", token); // Debugging line
+
     if (token) {
       try {
         const decodedToken = jwtDecode<User>(token); // Decode the JWT token
-        console.log('Decoded Token:', decodedToken); // Debugging line
+        console.log("Decoded Token:", decodedToken); // Debugging line
+
         setIsAuthenticated(true);
         setUser(decodedToken); // Store decoded user info
+
+        // Cache user data to localStorage
+        localStorage.setItem("userData", JSON.stringify(decodedToken));
+
       } catch (error) {
-        console.error('Failed to decode token', error);
+        console.error("Failed to decode token", error);
         setIsAuthenticated(false);
         setUser(null);
+
+        // Remove potentially invalid cached data
+        localStorage.removeItem("userData");
       }
     } else {
       setIsAuthenticated(false);
       setUser(null);
+
+      // Clear any cached data when not authenticated
+      localStorage.removeItem("userData");
     }
+
     setLoading(false); // Set loading to false once the checks are done
   }, []);
 
@@ -54,7 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

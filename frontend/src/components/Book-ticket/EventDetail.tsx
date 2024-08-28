@@ -3,6 +3,7 @@ import axios from "axios";
 import { BACKEND_URL } from "../../config";
 import Spinner from "../Spinner";
 import { useNavigate } from "react-router-dom";
+
 export interface TicketType {
   id: string;
   name: string;
@@ -40,7 +41,7 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
   imageUrl,
   ticketTypes,
 }) => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [selectedTickets, setSelectedTickets] = useState<SelectedTicket[]>([]);
   const [currentQuantities, setCurrentQuantities] = useState<{ [id: string]: number }>({});
   const [bookingFee] = useState(40); // Fixed booking fee
@@ -73,6 +74,8 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
   };
 
   const handleAddTicket = (ticket: TicketType) => {
+    console.log("clicked");
+
     const quantity = currentQuantities[ticket.id] || 0;
 
     if (quantity > 0 && userId) {
@@ -84,12 +87,15 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
         if (existingTicketIndex >= 0) {
           const updatedTickets = [...prevSelectedTickets];
           updatedTickets[existingTicketIndex].quantity += quantity;
+          console.log('Updated Tickets:', updatedTickets); // Debugging line
           return updatedTickets;
         } else {
-          return [
+          const newTickets = [
             ...prevSelectedTickets,
             { userId, ticketTypeId: ticket.id, quantity },
           ];
+          console.log('New Tickets:', newTickets); // Debugging line
+          return newTickets;
         }
       });
 
@@ -99,6 +105,10 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
       }));
     }
   };
+
+  useEffect(() => {
+    console.log('Selected Tickets:', selectedTickets); // Debugging line
+  }, [selectedTickets]);
 
   const totalAmount = selectedTickets.reduce(
     (total, selectedTicket) =>
@@ -126,7 +136,7 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
       if (response.status === 200) {
         console.log("Tickets assigned successfully:", response.data);
         const ticketsParam = encodeURIComponent(JSON.stringify(response.data));
-      navigate(`/ticket?tickets=${ticketsParam}`);
+        navigate(`/ticket?tickets=${ticketsParam}`);
       } else {
         console.error("Failed to assign tickets:", response.data);
         // Handle errors (e.g., show an error message)
@@ -141,7 +151,7 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto my-12 px-6 py-8">
-      {loading && <Spinner />} 
+      {loading && <Spinner />}
       {/* Event Banner */}
       <div className="relative mb-12 rounded-lg overflow-hidden shadow-lg">
         <img
@@ -219,7 +229,7 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
                 </button>
               </div>
               <button
-                className="mt-4 w-full bg-[#7848F4] text-white py-2 rounded-md transition-colors"
+                className="mt-4 w-full bg-[#7848F4] text-white py-2 rounded-md hover:bg-[#5E30C9] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5E30C9]"
                 onClick={() => handleAddTicket(ticket)}
               >
                 Add
@@ -227,44 +237,51 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center py-6">
-            <p className="text-lg text-gray-500">No tickets available</p>
-          </div>
+          <p>No tickets available</p>
         )}
       </div>
 
-      {/* Ticket Summary */}
+      {/* Selected Tickets Summary */}
       {selectedTickets.length > 0 && (
-        <div className="mt-12 bg-gray-100 p-6 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-semibold mb-4">Selected Tickets</h2>
-          <ul className="space-y-4">
-            {selectedTickets.map((ticket) => {
-              const ticketDetails = ticketTypes.find(
-                (t) => t.id === ticket.ticketTypeId
-              );
-              return ticketDetails ? (
-                <li key={ticket.ticketTypeId} className="flex justify-between">
-                  <span>{ticketDetails.name}</span>
-                  <span>
-                    ₹{ticketDetails.price.toFixed(2)} x {ticket.quantity}
-                  </span>
-                </li>
-              ) : null;
-            })}
-            <li className="flex justify-between font-semibold">
-              <span>Total Amount</span>
-              <span>₹{totalAmount.toFixed(2)}</span>
-            </li>
-          </ul>
-           <div>
-           {loading && <Spinner />}
-          <button
-            className="mt-6 w-full bg-[#7848F4] text-white py-2 rounded-md transition-colors"
-            onClick={handleTicket}
-          >
-            Confirm Booking
-          </button>
-          </div> 
+        <div className="mt-10 bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold mb-4">Your Selected Tickets</h2>
+          {selectedTickets.map((ticket, index) => {
+            const ticketType = ticketTypes.find(
+              (type) => type.id === ticket.ticketTypeId
+            );
+            return (
+              <div key={index} className="flex justify-between items-center py-2 border-b">
+                <div>
+                  <h3 className="text-lg font-semibold">{ticketType?.name}</h3>
+                  <p>Quantity: {ticket.quantity}</p>
+                  <p>
+                    Subtotal: ₹
+                    {(ticketType?.price || 0) * ticket.quantity + bookingFee * ticket.quantity}
+                  </p>
+                </div>
+                <button
+                  onClick={() =>
+                    setSelectedTickets((prev) =>
+                      prev.filter((t) => t.ticketTypeId !== ticket.ticketTypeId)
+                    )
+                  }
+                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
+                >
+                  Remove
+                </button>
+              </div>
+            );
+          })}
+          <div className="flex justify-between items-center mt-6">
+            <p className="text-xl font-bold">Total Amount: ₹{totalAmount.toFixed(2)}</p>
+            <button
+              className="bg-[#7848F4] text-white px-6 py-3 rounded-md hover:bg-[#5E30C9] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5E30C9]"
+              onClick={handleTicket}
+              disabled={loading} // Disable button when loading
+            >
+              Confirm Booking
+            </button>
+          </div>
         </div>
       )}
     </div>
