@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BACKEND_URL } from '../config';
-import { ticketType, TicketType } from '@jainam-b/event-comman/dist';
+import {  TicketType } from '@jainam-b/event-comman/dist';
 
 interface Event {
   ticketTypes: TicketType[];
