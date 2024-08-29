@@ -4,16 +4,15 @@ import EventCard from "./EventCard";
 
 import useEvents from "../hooks/event";
 import Spinner from "./Spinner";
+import EventCardSkeleton from "./EventCardSketon";
 const UpcommingEvents = ({title}:{title:string}) => {
   const { events, loading, error } = useEvents();
   if (loading) {
     return (
-      <div className="flex justify-center flex-col h-screen ">
-        <div className="flex justify-center">
-          <div>
-            <Spinner />
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <EventCardSkeleton />
+        <EventCardSkeleton />
+        <EventCardSkeleton />
       </div>
     );
   }

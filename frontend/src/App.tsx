@@ -12,6 +12,7 @@ import AllEvents from "./pages/AllEvents";
 import AuthStatus from "./components/AuthStatus";
 import BookTicket from "./components/BookTicket";
 import Ticket from "./pages/Ticket";
+import EventCardSkeleton from "./components/EventCardSketon";
 // import Checkout from "./components/Checkout";
 
 const App: React.FC = () => {
@@ -22,6 +23,7 @@ const App: React.FC = () => {
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/auth" element={<AuthStatus />} />
+          <Route path="/try" element={<EventCardSkeleton />} />
           {/* <Route path="/checkout" element={<Checkout/>} /> */}
 
           
