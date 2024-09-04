@@ -1,4 +1,3 @@
-import React from 'react';
 import AppBar from '../components/AppBar';
 import AllEventsBanner from '../components/AllEventsBanner';
 import EventCard from '../components/EventCard';

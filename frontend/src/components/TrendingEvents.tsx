@@ -3,7 +3,6 @@ import EventCard from "./EventCard";
 
 
 import useEvents from "../hooks/event";
-import Spinner from "./Spinner";
 import EventCardSkeleton from "./EventCardSketon";
 const UpcommingEvents = ({title}:{title:string}) => {
   const { events, loading, error } = useEvents();
