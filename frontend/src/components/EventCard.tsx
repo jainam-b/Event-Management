@@ -11,7 +11,7 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free = false, title, date, description }) => {
-  console.log("====+++++++++++++++++++++++++++++++++",id);
+  // console.log("====+++++++++++++++++++++++++++++++++",id);
   
   return (
     <Link to={`/event/${id}`}>

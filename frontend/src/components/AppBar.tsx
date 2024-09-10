@@ -12,7 +12,7 @@ const AppBar: React.FC = () => {
       <nav className="w-full border-gray-200 dark:border-gray-600">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
-            <span className="self-center text-4xl font-semibold whitespace-nowrap">
+            <span className="self-center text-2xl md:text-4xl font-semibold whitespace-nowrap">
               Event <span className="text-[#7848F4]"> Hive</span>
             </span>
           </a>

@@ -1,10 +1,7 @@
-
 import EventCard from "./EventCard";
-
-
 import useEvents from "../hooks/event";
 import EventCardSkeleton from "./EventCardSketon";
-const UpcommingEvents = ({title}:{title:string}) => {
+const TrendingEvents = ({title}:{title:string}) => {
   const { events, loading, error } = useEvents();
   if (loading) {
     return (
@@ -23,7 +20,7 @@ const UpcommingEvents = ({title}:{title:string}) => {
       <div className="text-5xl ml-5 font-semibold font-sans whitespace-nowrap ">
         {title} <span className="text-[#7848F4]">Event</span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4p">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {events.slice(0,3).map((event) => (
           <EventCard
             key={event.id}
@@ -48,4 +45,4 @@ const UpcommingEvents = ({title}:{title:string}) => {
   );
 };
 
-export default UpcommingEvents;
+export default TrendingEvents;

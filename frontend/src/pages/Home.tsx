@@ -1,7 +1,6 @@
 import  { useEffect, useState } from "react";
 import AppBar from "../components/AppBar";
 import Banner from "../components/Banner";
-
 import UpcommingEvents from "../components/UpcommingEvents";
 import CreateEventBanner from "../components/CreateEventBanner";
 import Footer from "../components/Footer";
@@ -36,12 +35,13 @@ const Home = () => {
         </div>
         <div className="">
           <Banner />
+          {/* <MobileBanner/> */}
         </div>
-        <div className="mt-32 px-40 ">
+        <div className="mt-32 md:px-40 ">
           <UpcommingEvents />
         </div>
         <div className="mt-10"><CreateEventBanner/></div>
-        <div className="mt-32 px-40 ">
+        <div className="mt-32 md:px-40 ">
           <TrendingEvents  title={"Trending"}/>
         </div>
         <div className="mt-10" ><Footer/></div>
