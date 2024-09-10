@@ -44,7 +44,7 @@ const EventBanner: React.FC<EventBannerProps> = ({eventId, img, name, descriptio
         </button>
       </div>
       <div className="absolute left-10 max-w-3xl font-sans mx-6 mt-3 text-white z-10">
-        <h1 className={`font-semibold mb-8 max-w-xl ${nameFontSize}`}>
+        <h1 className={`font-semibold  mb-8 max-w-xl  ${nameFontSize}`}>
           {name}
         </h1>
         <p className={`mt-8 mb-4 ${descriptionFontSize}`}>
@@ -54,7 +54,7 @@ const EventBanner: React.FC<EventBannerProps> = ({eventId, img, name, descriptio
           <img src={mappin} className="mr-2" alt="Map Pin" /> View map
         </button>
       </div>
-      <div className="absolute mx-5 mr-14 right-14 top-1/3 transform -translate-y-[20%] bg-white text-black p-8 rounded-lg shadow-lg w-[25rem] z-10">
+      <div className="absolute hidden md:block mx-5 mr-14 right-14 top-1/3 transform -translate-y-[20%] bg-white text-black p-8 rounded-lg shadow-lg w-[25rem] z-10">
         <h3 className="text-3xl font-bold">Date & time</h3>
         <p className="mt-5 text-slate-500">{formattedDate}</p>
         <a href="#" className="text-purple-500 underline mt-4 block">

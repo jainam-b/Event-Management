@@ -11,14 +11,12 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free = false, title, date, description }) => {
-  // console.log("====+++++++++++++++++++++++++++++++++",id);
-  
   return (
     <Link to={`/event/${id}`}>
-      <div className="w-128 h-[22rem] bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5">
+      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl h-auto bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5">
         <div className="p-4 flex flex-col h-full">
           <div className="relative">
-            <img src={imageURL} alt={title} className="w-full h-48 object-cover rounded-lg" />
+            <img src={imageURL} alt={title} className="w-full h-48 md:h-60 lg:h-72 object-cover rounded-lg" />
             {free && (
               <span className="absolute top-2 left-2 bg-white px-2 py-1 rounded text-xs font-bold">FREE</span>
             )}
