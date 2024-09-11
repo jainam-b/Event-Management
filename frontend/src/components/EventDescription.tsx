@@ -24,7 +24,7 @@ const EventData: React.FC<EventDataProps> = ({ description, weekdaysHours, sunda
       {/* Description Section */}
       <div className="col-span-1">
         <div className="text-2xl md:text-3xl font-medium">Description</div>
-        <div className="max-w-xl font-thin text-md mt-4">
+        <div className=" text-xl  font-thin text-md mt-4">
           {description}
         </div>
       </div>
@@ -32,7 +32,7 @@ const EventData: React.FC<EventDataProps> = ({ description, weekdaysHours, sunda
       {/* Hours Section */}
       <div className="mt-6">
         <div className="text-2xl md:text-3xl font-medium">Timing</div>
-        <div className="mt-3 text-lg font-thin">
+        <div className="mt-3 text-sm md:text-base font-thin">
             <span className="text-[#7848F4] font-bold text-lg md:text-base  mx-2">{formatDateTime(weekdaysHours)}</span>
         </div>
  

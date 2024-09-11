@@ -4,7 +4,7 @@ import whatsapp from "../assets/whatsapp.png";
 
 const EventLocation: React.FC = () => {
   return (
-    <div className="font-sans p-4">
+    <div className="font-sans px-4 md:px-10">
       <div className="text-2xl md:text-3xl font-medium">
         <div>Event Location</div>
         <div className="mt-4">
