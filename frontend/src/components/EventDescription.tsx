@@ -14,11 +14,11 @@ const formatDateTime = (isoString: string) => {
 interface EventDataProps {
   description: string;
   weekdaysHours: string;
-  sundayHours: string;
+   
   organizerContact: string;
 }
 
-const EventData: React.FC<EventDataProps> = ({ description, weekdaysHours, sundayHours, organizerContact }) => {
+const EventData: React.FC<EventDataProps> = ({ description, weekdaysHours,organizerContact }) => {
   return (
     <div className="px-4 md:px-10 font-sans">
       {/* Description Section */}

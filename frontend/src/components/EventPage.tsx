@@ -47,7 +47,7 @@ const EventPage: React.FC = () => {
             <EventDescription
               description={event.description || 'No description available'}
               weekdaysHours={event.startTime || 'No hours available'}
-              sundayHours={event.endTime || 'No hours available'}
+               
               organizerContact={event.organizer || 'No contact available'}
             />
             <EventLocation />

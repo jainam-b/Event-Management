@@ -25,15 +25,18 @@ const AllEvents = () => {
   return (
     <div>
       <AppBar />
-      <AllEventsBanner />
+      <div className='hidden md:block'>
 
-      <div className="flex">
-        <div className="text-5xl pt-12 mt-10 px-8 font-semibold font-sans whitespace-nowrap">
+      <AllEventsBanner />
+      </div>
+
+      <div className="flex ">
+        <div className=" text-2xl md:text-5xl pt-12 mt-10 px-8 font-semibold font-sans whitespace-nowrap">
           <span className="text-[#7848F4]">Events</span> around you
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-2 md:p-8">
         {loading && events.length === 0 ? (
           // Show skeletons while loading
           <>

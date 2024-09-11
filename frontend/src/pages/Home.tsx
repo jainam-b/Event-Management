@@ -37,11 +37,11 @@ const Home = () => {
           <Banner />
           {/* <MobileBanner/> */}
         </div>
-        <div className="mt-32  px-4 md:px-40 ">
+        <div className="mt-32  px-2 md:px-40 ">
           <UpcommingEvents />
         </div>
         <div className="mt-10"><CreateEventBanner/></div>
-        <div className="mt-32   md:px-40 ">
+        <div className="mt-32  px-2 md:px-40 ">
           <TrendingEvents  title={"Trending"}/>
         </div>
         <div className="mt-10" ><Footer/></div>
