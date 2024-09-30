@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { BACKEND_URL } from "../../config";
+import { BACKEND_URL, SECRET_KEY } from "../../config";
 import Spinner from "../Spinner";
 import { useNavigate } from "react-router-dom";
-
 export interface TicketType {
   id: string;
   name: string;
@@ -41,14 +40,12 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
   imageUrl,
   ticketTypes,
 }) => {
-  const navigate = useNavigate();
   const [selectedTickets, setSelectedTickets] = useState<SelectedTicket[]>([]);
   const [currentQuantities, setCurrentQuantities] = useState<{ [id: string]: number }>({});
-  const [bookingFee] = useState(40); // Fixed booking fee
-
+  const [bookingFee] = useState(40);
   const [userId, setUserId] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false); // Loading state
-
+  const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
   useEffect(() => {
     const userDataString = localStorage.getItem("userData");
     if (userDataString) {
@@ -74,8 +71,6 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
   };
 
   const handleAddTicket = (ticket: TicketType) => {
-    console.log("clicked");
-
     const quantity = currentQuantities[ticket.id] || 0;
 
     if (quantity > 0 && userId) {
@@ -87,15 +82,12 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
         if (existingTicketIndex >= 0) {
           const updatedTickets = [...prevSelectedTickets];
           updatedTickets[existingTicketIndex].quantity += quantity;
-          console.log('Updated Tickets:', updatedTickets); // Debugging line
           return updatedTickets;
         } else {
-          const newTickets = [
+          return [
             ...prevSelectedTickets,
             { userId, ticketTypeId: ticket.id, quantity },
           ];
-          console.log('New Tickets:', newTickets); // Debugging line
-          return newTickets;
         }
       });
 
@@ -105,10 +97,6 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
       }));
     }
   };
-
-  useEffect(() => {
-    console.log('Selected Tickets:', selectedTickets); // Debugging line
-  }, [selectedTickets]);
 
   const totalAmount = selectedTickets.reduce(
     (total, selectedTicket) =>
@@ -120,9 +108,8 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
   );
 
   const handleTicket = async () => {
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
-      console.log("Sending request with selected tickets:", selectedTickets);
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/phase/events/${id}/tickets/assign-phase`,
         selectedTickets,
@@ -134,24 +121,71 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
       );
 
       if (response.status === 200) {
-        console.log("Tickets assigned successfully:", response.data);
-        const ticketsParam = encodeURIComponent(JSON.stringify(response.data));
-        navigate(`/ticket?tickets=${ticketsParam}`);
+        const res = await loadRazorpayScript('https://checkout.razorpay.com/v1/checkout.js');
+        if (!res) {
+          alert('Failed to load Razorpay SDK. Please try again.');
+          return;
+        }
+
+        const options = {
+          key: SECRET_KEY,
+          amount: totalAmount * 100,
+          currency: 'INR',
+          name: 'Event-Hive',
+          description: 'Booking Tickets',
+          handler: function (response: any) {
+            console.log('Payment response:', response);
+            // Redirect to Ticket page after successful payment
+            const ticketData = {
+              tickets: selectedTickets.map(ticket => ({
+                ticketTypeId: ticket.ticketTypeId,
+                quantity: ticket.quantity
+              }))
+            };
+            const encodedTicketData = encodeURIComponent(JSON.stringify(ticketData));
+            navigate(`/ticket?tickets=${encodedTicketData}`);
+          },
+          prefill: {
+            name: 'Your Name',
+            email: 'your-email@example.com',
+            contact: '9999999999'
+          },
+          theme: {
+            color: '#3399cc'
+          }
+        };
+
+
+        const paymentObject = new (window as any).Razorpay(options);
+        paymentObject.open();
       } else {
         console.error("Failed to assign tickets:", response.data);
-        // Handle errors (e.g., show an error message)
       }
     } catch (error) {
       console.error("An error occurred during ticket assignment:", error);
-      // Handle errors (e.g., show an error message)
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
+  };
+  
+  const loadRazorpayScript = (src: string) => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
   };
 
   return (
-    <div className="max-w-5xl mx-auto my-12 px-6 py-8">
-      {loading && <Spinner />}
+    <div className="relative max-w-5xl mx-auto my-12 px-6 py-8">
+      {loading && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+          <Spinner />
+        </div>
+      )}
+      
       {/* Event Banner */}
       <div className="relative mb-12 rounded-lg overflow-hidden shadow-lg">
         <img
@@ -277,7 +311,7 @@ const EventDetailPage: React.FC<EventDetailPageProps> = ({
             <button
               className="bg-[#7848F4] text-white px-6 py-3 rounded-md hover:bg-[#5E30C9] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5E30C9]"
               onClick={handleTicket}
-              disabled={loading} // Disable button when loading
+              disabled={loading}
             >
               Confirm Booking
             </button>

@@ -12,8 +12,8 @@ interface EventCardProps {
 
 const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free = false, title, date, description }) => {
   return (
-    <Link to={`/event/${id}`}>
-      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl h-auto bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5">
+    <Link to={`/event/${id}`} className="block w-full max-w-sm sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mt-10 mx-5 min-h-[24rem]">
         <div className="p-4 flex flex-col h-full">
           <div className="relative">
             <img src={imageURL} alt={title} className="w-full h-48 md:h-60 lg:h-72 object-cover rounded-lg" />
@@ -22,9 +22,9 @@ const EventCard: React.FC<EventCardProps> = ({ id, imageURL, free = false, title
             )}
           </div>
           <div className="mt-4 flex flex-col flex-grow">
-            <h2 className="text-lg font-semibold line-clamp-2">{title}</h2>
-            <p className="text-purple-600 text-sm mt-2">{date}</p>
-            <p className="text-gray-600 text-sm mt-2 line-clamp-2 flex-grow">
+            <h2 className="text-lg font-semibold line-clamp-2 mb-2">{title}</h2>
+            <p className="text-purple-600 text-sm mb-2">{date}</p>
+            <p className="text-gray-600 text-sm truncate">
               {description}
             </p>
           </div>

@@ -6,7 +6,6 @@ import EventCardSkeleton from "./EventCardSketon";
 const UpcomingEvents = () => {
   const { events, loading, error } = useEvents();
   const navigate = useNavigate();
-  
 
   if (loading) {
     return (
@@ -20,19 +19,18 @@ const UpcomingEvents = () => {
       </div>
     );
   }
-  
-  
 
   if (error) {
     return <div>Error: {error.message}</div>;
   }
 
   return (
-    <div>
-      <div className="text-2xl md:text-5xl font-semibold font-sans whitespace-nowrap">
+    <div className="flex flex-col items-center justify-center">
+      <div className="text-2xl md:text-5xl font-semibold font-sans text-center">
         Upcoming <span className="text-[#7848F4]">Event</span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Grid for Event Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 justify-center">
         {events.slice(0, 6).map((event) => (
           <EventCard
             key={event.id}
@@ -48,16 +46,15 @@ const UpcomingEvents = () => {
           />
         ))}
       </div>
+      {/* Load More Button */}
       <div className="flex items-center justify-center">
-        <div>
-          <button
-            type="button"
-            className="mt-10 flex justify-center items-center bg-[#7848F4] text-white py-2 px-4 text-xl rounded"
-            onClick={() => navigate("/events")}
-          >
-            Load More ..
-          </button>
-        </div>
+        <button
+          type="button"
+          className="mt-10 bg-[#7848F4] text-white py-2 px-6 text-xl rounded"
+          onClick={() => navigate("/events")}
+        >
+          Load More ..
+        </button>
       </div>
     </div>
   );

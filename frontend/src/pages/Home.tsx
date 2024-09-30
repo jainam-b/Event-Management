@@ -1,6 +1,6 @@
 import  { useEffect, useState } from "react";
 import AppBar from "../components/AppBar";
-import Banner from "../components/Banner";
+import Banner, { Carousel } from "../components/Banner";
 import UpcommingEvents from "../components/UpcommingEvents";
 import CreateEventBanner from "../components/CreateEventBanner";
 import Footer from "../components/Footer";
@@ -33,11 +33,18 @@ const Home = () => {
            
           <AppBar /> 
         </div>
-        <div className="">
-          <Banner />
-          {/* <MobileBanner/> */}
-        </div>
-        <div className="mt-32  px-2 md:px-40 ">
+        <div>
+  {/* Banner will be shown on medium (md) and larger devices */}
+  <div className="hidden md:block">
+    <Banner />
+  </div>
+
+  {/* Carousel will be shown on small devices (below md size) */}
+  <div className="block md:hidden mt-5">
+    <Carousel />
+  </div>
+</div>
+        <div className=" mt-16 md:mt-32  px-2 md:px-40 ">
           <UpcommingEvents />
         </div>
         <div className="mt-10"><CreateEventBanner/></div>
